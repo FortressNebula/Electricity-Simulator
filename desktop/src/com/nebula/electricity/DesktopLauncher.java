@@ -2,7 +2,6 @@ package com.nebula.electricity;
 
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
-import com.nebula.electricity.ElectricitySimulator;
 
 // Please note that on macOS your application needs to be started with the -XstartOnFirstThread JVM argument
 public class DesktopLauncher {
@@ -10,6 +9,7 @@ public class DesktopLauncher {
 		Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
 		config.setForegroundFPS(60);
 		config.setTitle("ElectricitySimulator");
+		config.setWindowedMode(1200, 800);
 		new Lwjgl3Application(new ElectricitySimulator(), config);
 	}
 }

@@ -1,31 +1,49 @@
 package com.nebula.electricity;
 
 import com.badlogic.gdx.ApplicationAdapter;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.nebula.electricity.content.Module;
+import com.nebula.electricity.content.world.World;
+
+import java.util.Arrays;
 
 public class ElectricitySimulator extends ApplicationAdapter {
-	SpriteBatch batch;
-	Texture img;
-	
+	// references to submodules
+	public static Module[] MODULES = new Module[]{};
+	public static final World WORLD = add(new World());
+
 	@Override
 	public void create () {
-		batch = new SpriteBatch();
-		img = new Texture("badlogic.jpg");
+		// Init all the submodules
+		WORLD.init(5, 5);
 	}
 
 	@Override
 	public void render () {
-		ScreenUtils.clear(1, 0, 0, 1);
-		batch.begin();
-		batch.draw(img, 0, 0);
-		batch.end();
+		ScreenUtils.clear(0, 0, 0, 1);
+		for (Module m : MODULES) {
+			if (m.hasRenderer()) m.getRenderer().draw();
+		}
 	}
-	
+
+	@Override
+	public void resize (int width, int height) {
+		for (Module m : MODULES) {
+			if (m.hasRenderer()) m.getRenderer().onResize(width, height);
+		}
+	}
+
 	@Override
 	public void dispose () {
-		batch.dispose();
-		img.dispose();
+		for (Module m : MODULES) {
+			if (m.hasRenderer()) m.getRenderer().dispose();
+			m.dispose();
+		}
+	}
+
+	static <T extends Module> T add(T module) {
+		MODULES = Arrays.copyOf(MODULES, MODULES.length + 1);
+		MODULES[MODULES.length - 1] = module;
+		return module;
 	}
 }
