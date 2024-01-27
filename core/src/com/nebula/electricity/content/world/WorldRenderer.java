@@ -12,19 +12,17 @@ public class WorldRenderer implements Disposable {
     final TextureRegion dark;
 
     public WorldRenderer () {
-
         backgroundTiles = new Texture("textures/background_tiles.png");
         light = new TextureRegion(backgroundTiles, 32, 35);
         dark = new TextureRegion(backgroundTiles, 32, 0, 32, 35);
     }
 
-    public void draw (SpriteBatch batch, Camera camera) {
+    public void draw (SpriteBatch batch, Camera camera, int scale, int width, int height) {
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
-        int s = 5;
-        for (int y = 5; y > 0; y--) {
-            for (int x = 0; x < 5; x++) {
-                batch.draw((x + y) % 2 == 0 ? light : dark, 32*x*s, 27*y*s, 32*s, 35*s);
+        for (int y = width - 1; y >= 0; y--) {
+            for (int x = 0; x < height; x++) {
+                batch.draw((x + y) % 2 == 0 ? light : dark, 32*x * scale, 27*y * scale - 16, 32 * scale, 35 * scale);
             }
         }
         batch.end();

@@ -1,4 +1,4 @@
-package com.nebula.electricity.content.tile;
+package com.nebula.electricity.content.world;
 
 public class Tile {
     private Type type;

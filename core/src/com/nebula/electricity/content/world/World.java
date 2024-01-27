@@ -2,8 +2,9 @@ package com.nebula.electricity.content.world;
 
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.nebula.electricity.ElectricitySimulator;
+import com.nebula.electricity.content.Config;
 import com.nebula.electricity.content.Module;
-import com.nebula.electricity.content.tile.Tile;
 
 import java.util.function.BiConsumer;
 
@@ -29,6 +30,12 @@ public class World implements Module {
         map = new Tile[width][height];
 
         forEach((x, y) -> map[x][y] = new Tile(Tile.Type.EMPTY));
+
+        // Centre camera position
+        ElectricitySimulator.cameraTranslate(
+                Config.SCALED_TILE_SIZE.x * width * 0.5f,
+                Config.SCALED_TILE_SIZE.y * height * 0.5f
+        );
     }
 
     @Override
@@ -43,7 +50,7 @@ public class World implements Module {
 
     @Override
     public void draw (SpriteBatch batch, Camera camera) {
-        renderer.draw(batch, camera);
+        renderer.draw(batch, camera, 5, width, height);
     }
 
     @Override
