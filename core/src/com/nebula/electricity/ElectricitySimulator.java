@@ -5,6 +5,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.nebula.electricity.content.Module;
 import com.nebula.electricity.content.input.InputManager;
@@ -27,7 +28,7 @@ public class ElectricitySimulator extends ApplicationAdapter {
 	private static final Color BACKGROUND_COLOUR = Color.valueOf("5e6385");
 	private static SpriteBatch batch;
 	private static OrthographicCamera camera;
-
+	private static boolean isCameraDirty;
 	// Application listener implementation methods
 	@Override
 	public void create () {
@@ -43,6 +44,8 @@ public class ElectricitySimulator extends ApplicationAdapter {
 	public void render () {
 		for (Module m : MODULES)
 			m.update();
+
+		if (isCameraDirty) camera.update();
 
 		ScreenUtils.clear(BACKGROUND_COLOUR);
 		for (Module m : MODULES)
@@ -71,8 +74,12 @@ public class ElectricitySimulator extends ApplicationAdapter {
 	}
 
 	public static void cameraTranslate (float dx, float dy) {
-		System.out.println("Translated camera!");
 		camera.translate(dx, dy);
-		camera.update();
+		isCameraDirty = true;
+	}
+
+	public static void cameraZoom (float zoom) {
+		camera.zoom = MathUtils.clamp(camera.zoom + zoom, 0.5f, 2);
+		isCameraDirty = true;
 	}
 }

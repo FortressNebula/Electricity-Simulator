@@ -29,5 +29,12 @@ public class InputManager implements Module {
 
         if (Gdx.input.isKeyPressed(Input.Keys.D))
             ElectricitySimulator.cameraTranslate(10, 0);
+
+        if (Gdx.input.isKeyPressed(Input.Keys.EQUALS))
+            ElectricitySimulator.cameraZoom(0.1f);
+
+        if (Gdx.input.isKeyPressed(Input.Keys.MINUS))
+            ElectricitySimulator.cameraZoom(-0.1f);
+
     }
 }

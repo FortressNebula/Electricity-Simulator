@@ -50,7 +50,7 @@ public class World implements Module {
 
     @Override
     public void draw (SpriteBatch batch, Camera camera) {
-        renderer.draw(batch, camera, 5, width, height);
+        renderer.draw(batch, camera, width, height);
     }
 
     @Override

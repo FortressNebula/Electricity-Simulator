@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Disposable;
+import com.nebula.electricity.content.Config;
 
 public class WorldRenderer implements Disposable {
     final Texture backgroundTiles;
@@ -17,12 +18,12 @@ public class WorldRenderer implements Disposable {
         dark = new TextureRegion(backgroundTiles, 32, 0, 32, 35);
     }
 
-    public void draw (SpriteBatch batch, Camera camera, int scale, int width, int height) {
+    public void draw (SpriteBatch batch, Camera camera, int width, int height) {
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
         for (int y = width - 1; y >= 0; y--) {
             for (int x = 0; x < height; x++) {
-                batch.draw((x + y) % 2 == 0 ? light : dark, 32*x * scale, 27*y * scale - 16, 32 * scale, 35 * scale);
+                batch.draw((x + y) % 2 == 0 ? light : dark, 32*x * Config.SCALE, 27*y * Config.SCALE - 16, 32 * Config.SCALE, 35 * Config.SCALE);
             }
         }
         batch.end();
