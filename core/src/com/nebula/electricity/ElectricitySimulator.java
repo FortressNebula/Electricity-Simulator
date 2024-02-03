@@ -5,14 +5,11 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.utils.ScreenUtils;
-import com.nebula.electricity.content.Config;
 import com.nebula.electricity.content.Module;
 import com.nebula.electricity.content.input.InputManager;
 import com.nebula.electricity.content.world.World;
-import com.nebula.electricity.math.Vector2i;
 
 import java.util.Arrays;
 
@@ -20,6 +17,7 @@ import java.util.Arrays;
  * Main class that handles all the modules of the simulator
  * Responsible for rendering modules with attachered renderers, and disposing them too
  */
+@SuppressWarnings("GDXJavaStaticResource")
 public class ElectricitySimulator extends ApplicationAdapter {
 	// All modules
 	public static Module[] MODULES = new Module[]{};
@@ -29,6 +27,7 @@ public class ElectricitySimulator extends ApplicationAdapter {
 
 	// Rendering information
 	private static final Color BACKGROUND_COLOUR = Color.valueOf("5e6385");
+	private static TextureAtlas atlas;
 	private static SpriteBatch batch;
 	private static OrthographicCamera camera;
 	private static boolean isCameraDirty;
@@ -41,6 +40,7 @@ public class ElectricitySimulator extends ApplicationAdapter {
 		// Initialise rendering tools
 		batch = new SpriteBatch();
 		camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		atlas = new TextureAtlas("atlases/main.atlas");
 		// Init all the modules
 		for (Module m : MODULES)
 			m.init();
@@ -79,6 +79,7 @@ public class ElectricitySimulator extends ApplicationAdapter {
 	 */
 	@Override
 	public void dispose () {
+		atlas.dispose();
 		batch.dispose();
 		for (Module m : MODULES)
 			m.dispose();
@@ -108,9 +109,9 @@ public class ElectricitySimulator extends ApplicationAdapter {
 		return getCamera(true);
 	}
 
-	public static Vector2i cameraUnprojectToWorldPos (Vector2 pos) {
-		Vector3 coords = camera.unproject(new Vector3(pos.x, pos.y, 0));
-		System.out.println(coords);
-		return new Vector2i(coords.x / Config.SCALED_TILE_SIZE.x, coords.y / Config.SCALED_TILE_SIZE.y, true);
+	// Atlas utilities
+
+	public static TextureAtlas.AtlasRegion getTexture (String name) {
+		return atlas.findRegion(name);
 	}
 }

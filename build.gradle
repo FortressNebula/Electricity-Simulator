@@ -9,8 +9,7 @@ buildscript {
         google()
     }
     dependencies {
-        
-
+        classpath "com.badlogicgames.gdx:gdx-tools:1.12.0"
     }
 }
 
@@ -60,3 +59,26 @@ project(":core") {
         
     }
 }
+
+// Store the parameters you want to pass the texturePacker here...
+project.ext.texturePacker = [ "assets/textures/", "assets/atlases/", "main" ]
+
+// Import the texture packer
+
+import com.badlogic.gdx.graphics.Texture
+import com.badlogic.gdx.tools.texturepacker.TexturePacker
+
+// Add a new task that packs the textures for you
+tasks.register('texturePacker') {
+    doLast {
+        if (project.ext.has('texturePacker')) {
+            logger.info "Calling TexturePacker: " + texturePacker
+            TexturePacker.Settings settings = new TexturePacker.Settings()
+            settings.duplicatePadding = true
+            settings.pot = false
+            settings.filterMin = Texture.TextureFilter.Linear
+            TexturePacker.process(settings, texturePacker[0], texturePacker[1], texturePacker[2])
+        }
+    }
+}
+
