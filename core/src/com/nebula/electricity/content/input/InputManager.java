@@ -5,6 +5,11 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputAdapter;
 import com.nebula.electricity.ElectricitySimulator;
 import com.nebula.electricity.content.Module;
+import com.nebula.electricity.content.content.world.AllWorldObjectTypes;
+import com.nebula.electricity.math.Vector2i;
+
+import java.util.Optional;
+import java.util.UUID;
 
 public class InputManager extends InputAdapter implements Module {
 
@@ -44,7 +49,17 @@ public class InputManager extends InputAdapter implements Module {
     public boolean touchDown (int screenX, int screenY, int pointer, int button) {
         if (button != Input.Buttons.LEFT) return false;
 
-        ElectricitySimulator.WORLD.selectedCoord = ElectricitySimulator.WORLD.coordinatesFromScreenPos(screenX, screenY);
+        Vector2i coords = ElectricitySimulator.WORLD.coordinatesFromScreenPos(screenX, screenY);
+
+        // Add cube
+        Optional<UUID> optionalID = ElectricitySimulator.WORLD.objectAt(coords);
+
+        if (optionalID.isPresent()) {
+            ElectricitySimulator.WORLD.removeObject(optionalID.get());
+        } else {
+            ElectricitySimulator.WORLD.newObject(AllWorldObjectTypes.CUBE, coords);
+        }
+
         return true;
     }
 }

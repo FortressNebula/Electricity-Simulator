@@ -4,12 +4,17 @@ import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.ObjectMap;
 import com.badlogic.gdx.utils.OrderedMap;
+import com.badlogic.gdx.utils.Pool;
 import com.nebula.electricity.ElectricitySimulator;
 import com.nebula.electricity.content.Config;
 import com.nebula.electricity.content.Module;
 import com.nebula.electricity.math.Vector2i;
 
+import java.util.Comparator;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.BiConsumer;
 
@@ -23,6 +28,8 @@ public class World implements Module {
     // Map information
     private int width, height;
     private Tile[][] map;
+    // Objects
+    private Pool<WorldObject> objectPool;
     private OrderedMap<UUID, WorldObject> allObjects;
     // DEBUG
     public Vector2i selectedCoord;
@@ -42,12 +49,20 @@ public class World implements Module {
         this.width = Config.WORLD_SIZE.x;
         this.height = Config.WORLD_SIZE.y;
         map = new Tile[width][height];
+
+        // Initialise object management thingys
         allObjects = new OrderedMap<>();
+        objectPool = new Pool<WorldObject>() {
+            @Override
+            protected WorldObject newObject () {
+                return new WorldObject();
+            }
+        };
 
         // Selected coordinate
         selectedCoord = new Vector2i(-1, -1);
 
-        forEach((x, y) -> map[x][y] = new Tile(Tile.Type.EMPTY));
+        forEach((x, y) -> map[x][y] = new Tile());
 
         // Centre camera position
         ElectricitySimulator.getCamera().translate(
@@ -68,12 +83,42 @@ public class World implements Module {
 
     @Override
     public void draw (SpriteBatch batch, Camera camera) {
-        renderer.draw(batch, camera, width, height, selectedCoord);
+        Array<WorldObject> objects = allObjects.values().toArray();
+        objects.sort(Comparator.comparingInt(a -> -a.position.y));
+        renderer.draw(batch, camera, width, height, objects);
     }
 
     @Override
     public void dispose () {
         renderer.dispose();
+    }
+
+    // Object methods
+
+    public void newObject (WorldObjectType type, Vector2i position) {
+        WorldObject object = objectPool.obtain();
+        object.initialise(position, type);
+        allObjects.put(UUID.randomUUID(), object);
+    }
+
+    public WorldObject getObject (UUID id) {
+        return allObjects.get(id);
+    }
+
+    public boolean removeObject (UUID id) {
+        return allObjects.remove(id) != null;
+    }
+
+    public Optional<UUID> objectAt (Vector2i pos) {
+        for (ObjectMap.Entry<UUID, WorldObject> entry : allObjects.iterator())
+            if (entry.value.occupiedAt(pos)) return Optional.of(entry.key);
+        return Optional.empty();
+    }
+
+    public boolean occupiedAt (Vector2i pos) {
+        for (WorldObject obj : allObjects.values())
+            if (obj.occupiedAt(pos)) return true;
+        return map[pos.x][pos.y].isOccupied();
     }
 
     // Utility methods

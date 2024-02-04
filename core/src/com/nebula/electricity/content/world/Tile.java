@@ -1,15 +1,13 @@
 package com.nebula.electricity.content.world;
 
 public class Tile {
-    private Type type;
+    private boolean hasWire;
 
-    public Tile (Type type) {
-        this.type = type;
+    public Tile () {
+        hasWire = false;
     }
 
-    public enum Type {
-        EMPTY,
-        OBJECT,
-        WIRE
+    public boolean isOccupied () {
+        return !hasWire;
     }
 }

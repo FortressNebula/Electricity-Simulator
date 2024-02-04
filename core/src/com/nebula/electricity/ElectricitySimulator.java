@@ -8,10 +8,13 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.nebula.electricity.content.Module;
+import com.nebula.electricity.content.content.events.AllEvents;
+import com.nebula.electricity.content.content.world.AllWorldObjectTypes;
 import com.nebula.electricity.content.input.InputManager;
 import com.nebula.electricity.content.world.World;
 
 import java.util.Arrays;
+import java.util.Random;
 
 /**
  * Main class that handles all the modules of the simulator
@@ -32,6 +35,9 @@ public class ElectricitySimulator extends ApplicationAdapter {
 	private static OrthographicCamera camera;
 	private static boolean isCameraDirty;
 
+	// General utilities
+	public static final Random RANDOM = new Random();
+
 	/**
 	 * Responsible for initialising all the modules, as well as initialising the core rendering components
 	 */
@@ -44,6 +50,10 @@ public class ElectricitySimulator extends ApplicationAdapter {
 		// Init all the modules
 		for (Module m : MODULES)
 			m.init();
+		// Init registries
+		AllWorldObjectTypes.register();
+		// Post initialisation event for any other objects/entities
+		AllEvents.INIT.post();
 	}
 
 	/**
