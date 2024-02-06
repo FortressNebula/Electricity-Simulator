@@ -47,8 +47,6 @@ public class InputManager extends InputAdapter implements Module {
 
     @Override
     public boolean touchDown (int screenX, int screenY, int pointer, int button) {
-        if (button != Input.Buttons.LEFT) return false;
-
         Vector2i coords = ElectricitySimulator.WORLD.coordinatesFromScreenPos(screenX, screenY);
 
         // Add cube
@@ -57,7 +55,7 @@ public class InputManager extends InputAdapter implements Module {
         if (optionalID.isPresent()) {
             ElectricitySimulator.WORLD.removeObject(optionalID.get());
         } else {
-            ElectricitySimulator.WORLD.newObject(AllWorldObjectTypes.CUBE, coords);
+            ElectricitySimulator.WORLD.newObject(button == Input.Buttons.LEFT ? AllWorldObjectTypes.CUBE : AllWorldObjectTypes.CYLINDER, coords);
         }
 
         return true;

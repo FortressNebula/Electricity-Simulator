@@ -1,20 +1,24 @@
-package com.nebula.electricity.content.content.world;
+package com.nebula.electricity.content.world;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.nebula.electricity.ElectricitySimulator;
 import com.nebula.electricity.content.Config;
-import com.nebula.electricity.content.world.WorldObject;
-import com.nebula.electricity.content.world.WorldObjectType;
 import com.nebula.electricity.math.Vector2i;
 
-public class CubeObjectType extends WorldObjectType {
-    TextureAtlas.AtlasRegion cube;
+public class SimpleObjectType extends WorldObjectType {
+    TextureAtlas.AtlasRegion texture;
+    String textureName;
+
+    public SimpleObjectType(String textureName) {
+        super();
+        this.textureName = textureName;
+    }
 
     @Override
-    protected void make () {
-        super.make();
-        cube = ElectricitySimulator.getTexture("objects/cube");
+    protected void load () {
+        super.load();
+        texture = ElectricitySimulator.getTexture("objects/" + textureName);
     }
 
     @Override
@@ -29,7 +33,7 @@ public class CubeObjectType extends WorldObjectType {
 
     @Override
     public void draw (SpriteBatch batch, WorldObject object) {
-        batch.draw(cube, object.position.x * Config.SCALED_TILE_SIZE.x, object.position.y * Config.SCALED_TILE_SIZE.y,
+        batch.draw(texture, object.position.x * Config.SCALED_TILE_SIZE.x, object.position.y * Config.SCALED_TILE_SIZE.y,
                 32 * Config.SCALE, 43 * Config.SCALE);
     }
 }

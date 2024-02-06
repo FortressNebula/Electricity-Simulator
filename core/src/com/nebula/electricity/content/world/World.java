@@ -95,10 +95,14 @@ public class World implements Module {
 
     // Object methods
 
-    public void newObject (WorldObjectType type, Vector2i position) {
+    public boolean newObject (WorldObjectType type, Vector2i position) {
+        // Make sure position is valid
+        if (!position.withinBounds(width - 1, height - 1)) return false;
+
         WorldObject object = objectPool.obtain();
         object.initialise(position, type);
         allObjects.put(UUID.randomUUID(), object);
+        return true;
     }
 
     public WorldObject getObject (UUID id) {

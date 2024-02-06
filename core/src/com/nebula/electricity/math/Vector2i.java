@@ -23,6 +23,16 @@ public class Vector2i {
         this.y = MathUtils.floor(y);
     }
 
+    public boolean withinBounds (int minX, int minY, int maxX, int maxY) {
+        if (x < minX || x > maxX) return false;
+        if (y < minY || y > maxY) return false;
+        return true;
+    }
+
+    public boolean withinBounds (int maxX, int maxY) {
+        return withinBounds(0, 0, maxX, maxY);
+    }
+
     public static Vector2i mul (Vector2i vec, int s) {
         return new Vector2i(vec.x * s, vec.y * s);
     }
