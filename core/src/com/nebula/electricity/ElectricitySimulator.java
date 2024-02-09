@@ -7,11 +7,11 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.utils.ScreenUtils;
-import com.nebula.electricity.content.Module;
-import com.nebula.electricity.content.content.events.AllEvents;
-import com.nebula.electricity.content.content.world.AllWorldObjectTypes;
-import com.nebula.electricity.content.input.InputManager;
-import com.nebula.electricity.content.world.World;
+import com.nebula.electricity.foundation.Module;
+import com.nebula.electricity.foundation.events.Events;
+import com.nebula.electricity.content.world.AllWorldObjects;
+import com.nebula.electricity.foundation.input.InputManager;
+import com.nebula.electricity.foundation.world.World;
 
 import java.util.Arrays;
 import java.util.Random;
@@ -51,9 +51,9 @@ public class ElectricitySimulator extends ApplicationAdapter {
 		for (Module m : MODULES)
 			m.init();
 		// Init registries
-		AllWorldObjectTypes.register();
+		AllWorldObjects.register();
 		// Post initialisation event for any other objects/entities
-		AllEvents.INIT.post();
+		Events.INIT.post();
 	}
 
 	/**
@@ -123,5 +123,9 @@ public class ElectricitySimulator extends ApplicationAdapter {
 
 	public static TextureAtlas.AtlasRegion getTexture (String name) {
 		return atlas.findRegion(name);
+	}
+
+	public static TextureAtlas.AtlasRegion getObjectTexture (String name) {
+		return atlas.findRegion("objects/" + name);
 	}
 }

@@ -1,11 +1,11 @@
-package com.nebula.electricity.content.input;
+package com.nebula.electricity.foundation.input;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputAdapter;
 import com.nebula.electricity.ElectricitySimulator;
-import com.nebula.electricity.content.Module;
-import com.nebula.electricity.content.content.world.AllWorldObjectTypes;
+import com.nebula.electricity.foundation.Module;
+import com.nebula.electricity.content.world.AllWorldObjects;
 import com.nebula.electricity.math.Vector2i;
 
 import java.util.Optional;
@@ -55,7 +55,9 @@ public class InputManager extends InputAdapter implements Module {
         if (optionalID.isPresent()) {
             ElectricitySimulator.WORLD.removeObject(optionalID.get());
         } else {
-            ElectricitySimulator.WORLD.newObject(button == Input.Buttons.LEFT ? AllWorldObjectTypes.CUBE : AllWorldObjectTypes.CYLINDER, coords);
+            ElectricitySimulator.WORLD.addObject(button == Input.Buttons.LEFT ?
+                    AllWorldObjects.CUBE.create(coords) :
+                    AllWorldObjects.CYLINDER.create(coords));
         }
 
         return true;

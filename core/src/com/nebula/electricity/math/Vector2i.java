@@ -33,8 +33,17 @@ public class Vector2i {
         return withinBounds(0, 0, maxX, maxY);
     }
 
-    public static Vector2i mul (Vector2i vec, int s) {
-        return new Vector2i(vec.x * s, vec.y * s);
+    public boolean isValid () { return x >= 0 && y >= 0; }
+
+    // Math methods
+    public Vector2i mul (int s) {
+        return new Vector2i(x * s, y * s);
+    }
+    public Vector2i add (Vector2i v) {
+        return new Vector2i(x + v.x, y + v.y);
+    }
+    public Vector2i add (int s) {
+        return new Vector2i(x + s, y + s);
     }
 
     @Override

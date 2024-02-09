@@ -1,4 +1,4 @@
-package com.nebula.electricity.content.world;
+package com.nebula.electricity.foundation.world;
 
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -7,10 +7,10 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.badlogic.gdx.utils.OrderedMap;
-import com.badlogic.gdx.utils.Pool;
 import com.nebula.electricity.ElectricitySimulator;
-import com.nebula.electricity.content.Config;
-import com.nebula.electricity.content.Module;
+import com.nebula.electricity.foundation.Constants;
+import com.nebula.electricity.foundation.Module;
+import com.nebula.electricity.foundation.world.object.WorldObject;
 import com.nebula.electricity.math.Vector2i;
 
 import java.util.Comparator;
@@ -29,7 +29,6 @@ public class World implements Module {
     private int width, height;
     private Tile[][] map;
     // Objects
-    private Pool<WorldObject> objectPool;
     private OrderedMap<UUID, WorldObject> allObjects;
     // DEBUG
     public Vector2i selectedCoord;
@@ -46,18 +45,12 @@ public class World implements Module {
         renderer = new WorldRenderer();
 
         // Populate map with tiles
-        this.width = Config.WORLD_SIZE.x;
-        this.height = Config.WORLD_SIZE.y;
+        this.width = Constants.WORLD_SIZE.x;
+        this.height = Constants.WORLD_SIZE.y;
         map = new Tile[width][height];
 
-        // Initialise object management thingys
+        // Initialise object map
         allObjects = new OrderedMap<>();
-        objectPool = new Pool<WorldObject>() {
-            @Override
-            protected WorldObject newObject () {
-                return new WorldObject();
-            }
-        };
 
         // Selected coordinate
         selectedCoord = new Vector2i(-1, -1);
@@ -66,8 +59,8 @@ public class World implements Module {
 
         // Centre camera position
         ElectricitySimulator.getCamera().translate(
-                Config.SCALED_TILE_SIZE.x * width * 0.5f,
-                Config.SCALED_TILE_SIZE.y * height * 0.5f
+                Constants.SCALED_TILE_SIZE.x * width * 0.5f,
+                Constants.SCALED_TILE_SIZE.y * height * 0.5f
         );
     }
 
@@ -84,7 +77,7 @@ public class World implements Module {
     @Override
     public void draw (SpriteBatch batch, Camera camera) {
         Array<WorldObject> objects = allObjects.values().toArray();
-        objects.sort(Comparator.comparingInt(a -> -a.position.y));
+        objects.sort(Comparator.comparingInt(a -> -a.getPos().y));
         renderer.draw(batch, camera, width, height, objects);
     }
 
@@ -95,12 +88,9 @@ public class World implements Module {
 
     // Object methods
 
-    public boolean newObject (WorldObjectType type, Vector2i position) {
+    public <T extends WorldObject> boolean addObject (T object) {
         // Make sure position is valid
-        if (!position.withinBounds(width - 1, height - 1)) return false;
-
-        WorldObject object = objectPool.obtain();
-        object.initialise(position, type);
+        if (!object.withinWorldBounds()) return false;
         allObjects.put(UUID.randomUUID(), object);
         return true;
     }
@@ -147,7 +137,7 @@ public class World implements Module {
      */
     public Vector2i coordinatesFromScreenPos (float x, float y) {
         Vector3 coords = ElectricitySimulator.getCamera(false).unproject(new Vector3(x, y, 0));
-        return new Vector2i(coords.x / Config.SCALED_TILE_SIZE.x, coords.y / Config.SCALED_TILE_SIZE.y, true);
+        return new Vector2i(coords.x / Constants.SCALED_TILE_SIZE.x, coords.y / Constants.SCALED_TILE_SIZE.y, true);
     }
 
     public Vector2i coordinatesFromScreenPos (Vector2 vec) {

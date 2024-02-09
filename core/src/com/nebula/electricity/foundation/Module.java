@@ -1,4 +1,4 @@
-package com.nebula.electricity.content;
+package com.nebula.electricity.foundation;
 
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;

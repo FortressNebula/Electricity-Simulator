@@ -1,4 +1,4 @@
-package com.nebula.electricity.content.world;
+package com.nebula.electricity.foundation.world;
 
 public class Tile {
     private boolean hasWire;
