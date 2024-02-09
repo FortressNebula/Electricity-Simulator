@@ -6,6 +6,7 @@ import com.badlogic.gdx.InputAdapter;
 import com.nebula.electricity.ElectricitySimulator;
 import com.nebula.electricity.foundation.Module;
 import com.nebula.electricity.content.world.AllWorldObjects;
+import com.nebula.electricity.foundation.world.object.WorldObject;
 import com.nebula.electricity.math.Vector2i;
 
 import java.util.Optional;
@@ -55,9 +56,14 @@ public class InputManager extends InputAdapter implements Module {
         if (optionalID.isPresent()) {
             ElectricitySimulator.WORLD.removeObject(optionalID.get());
         } else {
-            ElectricitySimulator.WORLD.addObject(button == Input.Buttons.LEFT ?
+            WorldObject object = button == Input.Buttons.LEFT ?
                     AllWorldObjects.CUBE.create(coords) :
-                    AllWorldObjects.CYLINDER.create(coords));
+                    AllWorldObjects.CYLINDER.create(coords);
+
+            if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT))
+                object.getProperties().set("horizontal", true);
+
+            ElectricitySimulator.WORLD.addObject(object);
         }
 
         return true;

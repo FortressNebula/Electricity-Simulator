@@ -5,29 +5,25 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.nebula.electricity.foundation.Constants;
 import com.nebula.electricity.math.Vector2i;
 
-public class WorldObject {
+public abstract class WorldObject {
     // Visual information
-    Vector2i position; // Bottom-left corner
-    Vector2i size;
+    protected Vector2i position; // Bottom-left corner
+    protected Vector2i size;
     Vector2i max;
     // Behavioural information
-    final WorldObjectProperties properties;
+    protected WorldObjectProperties properties;
     boolean isTicking;
-    // Rendering information
-    TextureAtlas.AtlasRegion texture;
 
-    public WorldObject () {
-        size = Vector2i.INVALID;
-        position = Vector2i.INVALID;
-        max = Vector2i.INVALID;
-        isTicking = false;
-        properties = new WorldObjectProperties();
-    }
-
+    // Graphics methods
     public void draw (SpriteBatch batch) {
-        batch.draw(texture, position.x * Constants.SCALED_TILE_SIZE.x, position.y * Constants.SCALED_TILE_SIZE.y,
-                texture.originalWidth * Constants.SCALE, texture.originalHeight * Constants.SCALE);
+        batch.draw(getTexture(), position.x * Constants.SCALED_TILE_SIZE.x, position.y * Constants.SCALED_TILE_SIZE.y,
+                getTexture().originalWidth * Constants.SCALE, getTexture().originalHeight * Constants.SCALE);
     }
+
+    protected abstract TextureAtlas.AtlasRegion getTexture ();
+
+    // Property methods
+    public WorldObjectProperties getProperties () { return properties; }
 
     // Collision methods
     public boolean occupiedAt (Vector2i coords) {

@@ -1,25 +1,23 @@
 package com.nebula.electricity.foundation.world.object;
 
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.nebula.electricity.ElectricitySimulator;
-import com.nebula.electricity.foundation.events.Events;
 import com.nebula.electricity.math.Vector2i;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+/**
+ * Class for creating objects of a certain type. Shouldn't require inheriting to create custom objects as class
+ * is already made to be super customizable
+ * @param <T> The kind of world object the creator makes
+ */
+@SuppressWarnings("unused")
 public class WorldObjectCreator<T extends WorldObject> {
-    Function<Vector2i, T> builder;
-    TextureAtlas.AtlasRegion texture;
+    final Function<Vector2i, T> builder;
 
-    private WorldObjectCreator (Function<Vector2i, T> builder, String textureName) {
-        this.builder = builder
-                .andThen(object -> {
-                    object.texture = texture;
-                    return object;
-                });
-        Events.INIT.add(() -> texture = ElectricitySimulator.getObjectTexture(textureName));
+    private WorldObjectCreator (Function<Vector2i, T> builder) {
+        this.builder = builder;
     }
 
     // Create an object using the factory
@@ -28,8 +26,8 @@ public class WorldObjectCreator<T extends WorldObject> {
     }
 
     // Factory
-    public static Factory<WorldObject> create () {
-        return new Factory<>(WorldObject::new);
+    public static Factory<SimpleObject> create () {
+        return new Factory<>(SimpleObject::new);
     }
     public static <T extends WorldObject> Factory<T> create (Supplier<T> builder) {
         return new Factory<>(builder);
@@ -38,24 +36,31 @@ public class WorldObjectCreator<T extends WorldObject> {
     public static class Factory<T extends WorldObject> {
         Supplier<T> builder;
 
-        String textureName;
         boolean isTicking;
         Vector2i size;
-        Consumer<WorldObjectProperties> propertiesBuilder;
+        Function<WorldObjectProperties, WorldObjectProperties> propertiesBuilder;
         Consumer<T> onObjectCreated;
+        Consumer<T> loadTextures;
+        boolean areTexturesDefined;
 
         private Factory (Supplier<T> builder) {
             this.builder = builder;
-            textureName = "";
             isTicking = false;
-            propertiesBuilder = $ -> {};
+            propertiesBuilder = $ -> $;
             onObjectCreated = $ -> {};
+            loadTextures = $ -> {};
+            areTexturesDefined = false;
             size = Vector2i.INVALID;
         }
 
         // Attach a texture to the object
         public Factory<T> withTexture (String name) {
-            textureName = name;
+            return withTextures(object -> ((SimpleObject) object).texture = ElectricitySimulator.getObjectTexture(name));
+        }
+
+        public Factory<T> withTextures (Consumer<T> textureLoader) {
+            loadTextures = textureLoader;
+            areTexturesDefined = true;
             return this;
         }
 
@@ -77,8 +82,8 @@ public class WorldObjectCreator<T extends WorldObject> {
         }
 
         // Assign properties to the object
-        public Factory<T> withProperties (Consumer<WorldObjectProperties> cons) {
-            propertiesBuilder = cons;
+        public Factory<T> withProperties (Function<WorldObjectProperties, WorldObjectProperties> func) {
+            propertiesBuilder = func;
             return this;
         }
 
@@ -102,19 +107,22 @@ public class WorldObjectCreator<T extends WorldObject> {
             validate();
             return new WorldObjectCreator<>(at -> {
                 T object = builder.get();
+
                 object.isTicking = isTicking;
                 object.position = at;
                 object.size = size;
                 object.max = at.add(size).add(-1);
-                propertiesBuilder.accept(object.properties);
+                object.properties = propertiesBuilder.apply(new WorldObjectProperties());
                 onObjectCreated.accept(object);
+                loadTextures.accept(object);
+
                 return object;
-            }, textureName);
+            });
         }
 
         // Ensure important fields have been filled out
         private void validate () {
-            if (textureName.isEmpty()) throw new NullPointerException("Object factory does not specify texture!");
+            if (!areTexturesDefined) throw new NullPointerException("Object factory does not specify texture!");
             if (!size.isValid()) throw new IndexOutOfBoundsException("Object factory does not specify size!");
         }
     }

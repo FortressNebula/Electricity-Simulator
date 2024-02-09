@@ -1,33 +1,33 @@
 
 main.png
-size: 136, 45
+size: 170, 45
 format: RGBA8888
 filter: Linear, Nearest
 repeat: none
 background/dark
-  rotate: false
-  xy: 69, 17
-  size: 32, 27
-  orig: 32, 27
-  offset: 0, 0
-  index: -1
-background/dark_wall
-  rotate: false
-  xy: 69, 7
-  size: 32, 8
-  orig: 32, 8
-  offset: 0, 0
-  index: -1
-background/light
   rotate: false
   xy: 103, 17
   size: 32, 27
   orig: 32, 27
   offset: 0, 0
   index: -1
-background/light_wall
+background/dark_wall
   rotate: false
   xy: 103, 7
+  size: 32, 8
+  orig: 32, 8
+  offset: 0, 0
+  index: -1
+background/light
+  rotate: false
+  xy: 137, 17
+  size: 32, 27
+  orig: 32, 27
+  offset: 0, 0
+  index: -1
+background/light_wall
+  rotate: false
+  xy: 137, 7
   size: 32, 8
   orig: 32, 8
   offset: 0, 0
@@ -39,9 +39,16 @@ objects/cube
   orig: 32, 43
   offset: 0, 0
   index: -1
-objects/cylinder
+objects/cylinder_horizontal
   rotate: false
   xy: 35, 1
+  size: 32, 43
+  orig: 32, 43
+  offset: 0, 0
+  index: -1
+objects/cylinder_vertical
+  rotate: false
+  xy: 69, 1
   size: 32, 43
   orig: 32, 43
   offset: 0, 0
