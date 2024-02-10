@@ -12,8 +12,8 @@ public class AllWorldObjects {
             .finished();
    public static final WorldObjectCreator<AxisObject> CYLINDER = WorldObjectCreator.create(AxisObject::new)
            .withTextures(obj -> {
-               obj.horizontal = ElectricitySimulator.getObjectTexture("cylinder_horizontal");
-               obj.vertical = ElectricitySimulator.getObjectTexture("cylinder_vertical");
+               obj.horizontal = ElectricitySimulator.getObjectTexture("cylinder/horizontal");
+               obj.vertical = ElectricitySimulator.getObjectTexture("cylinder/vertical");
            })
            .withProperties(p -> p.add("horizontal", false))
            .oneByOne()

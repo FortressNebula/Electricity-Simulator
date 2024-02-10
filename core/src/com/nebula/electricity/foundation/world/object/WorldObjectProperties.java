@@ -1,6 +1,7 @@
 package com.nebula.electricity.foundation.world.object;
 
 import com.badlogic.gdx.utils.ObjectMap;
+import com.nebula.electricity.math.Direction;
 
 @SuppressWarnings("unused")
 public class WorldObjectProperties {
@@ -19,13 +20,19 @@ public class WorldObjectProperties {
     public void reset () { propertyMap.clear(); }
 
     // Getters
-    public Object get (String name) {
-        return propertyMap.get(name);
+    public <T> T get (String name, Class<T> clazz) {
+        return (T) propertyMap.get(name);
     }
     public boolean getBool (String name) {
-        return (boolean) get(name);
+        return get(name, Boolean.class);
     }
     public float getFloat (String name) {
-        return (float) get(name);
+        return get(name, Float.class);
+    }
+    public Direction getDirection () {
+        return getDirection("direction");
+    }
+    public Direction getDirection (String name) {
+        return get(name, Direction.class);
     }
 }

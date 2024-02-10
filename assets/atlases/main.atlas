@@ -39,14 +39,14 @@ objects/cube
   orig: 32, 43
   offset: 0, 0
   index: -1
-objects/cylinder_horizontal
+objects/cylinder/horizontal
   rotate: false
   xy: 35, 1
   size: 32, 43
   orig: 32, 43
   offset: 0, 0
   index: -1
-objects/cylinder_vertical
+objects/cylinder/vertical
   rotate: false
   xy: 69, 1
   size: 32, 43

@@ -111,7 +111,6 @@ public class WorldObjectCreator<T extends WorldObject> {
                 object.isTicking = isTicking;
                 object.position = at;
                 object.size = size;
-                object.max = at.add(size).add(-1);
                 object.properties = propertiesBuilder.apply(new WorldObjectProperties());
                 onObjectCreated.accept(object);
                 loadTextures.accept(object);

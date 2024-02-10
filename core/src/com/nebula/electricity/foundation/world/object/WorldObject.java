@@ -9,7 +9,6 @@ public abstract class WorldObject {
     // Visual information
     protected Vector2i position; // Bottom-left corner
     protected Vector2i size;
-    Vector2i max;
     // Behavioural information
     protected WorldObjectProperties properties;
     boolean isTicking;
@@ -29,17 +28,18 @@ public abstract class WorldObject {
     public boolean occupiedAt (Vector2i coords) {
         if (coords.x < position.x) return false;
         if (coords.y < position.y) return false;
-        if (coords.x > position.x + size.x - 1) return false;
-        if (coords.y > position.y + size.y - 1) return false;
+        if (coords.x > position.x + getSize().x - 1) return false;
+        if (coords.y > position.y + getSize().y - 1) return false;
 
         return true;
     }
 
     public boolean withinWorldBounds () {
         return position.withinBounds(Constants.WORLD_SIZE.x, Constants.WORLD_SIZE.y) &&
-                max.withinBounds(Constants.WORLD_SIZE.x, Constants.WORLD_SIZE.y);
+                position.add(getSize()).add(-1).withinBounds(Constants.WORLD_SIZE.x, Constants.WORLD_SIZE.y);
     }
     public Vector2i getPos () {
         return position;
     }
+    protected abstract Vector2i getSize ();
 }
