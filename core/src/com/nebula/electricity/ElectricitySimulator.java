@@ -68,8 +68,10 @@ public class ElectricitySimulator extends ApplicationAdapter {
 		if (isCameraDirty) camera.update();
 
 		ScreenUtils.clear(BACKGROUND_COLOUR);
+		batch.begin();
 		for (Module m : MODULES)
 			if (m.doesDraw()) m.draw(batch, camera);
+		batch.end();
 	}
 
 	/**

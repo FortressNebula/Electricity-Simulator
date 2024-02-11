@@ -1,32 +1,79 @@
 package com.nebula.electricity.foundation.input;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputAdapter;
+import com.badlogic.gdx.graphics.Camera;
+import com.badlogic.gdx.graphics.Cursor;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.nebula.electricity.ElectricitySimulator;
 import com.nebula.electricity.foundation.Module;
-import com.nebula.electricity.content.world.AllWorldObjects;
-import com.nebula.electricity.foundation.world.object.WorldObject;
-import com.nebula.electricity.math.Vector2i;
-
-import java.util.Optional;
-import java.util.UUID;
 
 public class InputManager extends InputAdapter implements Module {
+    InputState state;
 
     @Override
     public void init () {
+        state = new DefaultInputState();
         Gdx.input.setInputProcessor(this);
     }
 
     @Override
     public boolean doesDraw () {
-        return false;
+        return true;
+    }
+
+    @Override
+    public void draw (SpriteBatch batch, Camera camera) {
+        state.draw(batch, camera);
     }
 
     @Override
     public void update () {
-        // TODO: fix when we actually want the camera moving again
+        state.update();
+    }
+
+    @Override
+    public boolean touchDown (int screenX, int screenY, int pointer, int button) {
+        InputActionResult result = state.touchDown(screenX, screenY, pointer, button);
+        state = result.getNewMode();
+        return result.wasSuccessful();
+    }
+
+    @Override
+    public boolean mouseMoved (int screenX, int screenY) {
+        state.mouseMoved(screenX, screenY);
+        return false;
+    }
+
+    @Override
+    public boolean keyDown (int keycode) {
+        InputActionResult result = state.keyDown(keycode);
+        state = result.getNewMode();
+        return result.wasSuccessful();
+    }
+
+    @Override
+    public boolean scrolled (float amountX, float amountY) {
+        state.mouseScrolled(amountY);
+        return false;
+    }
+
+    static class DefaultInputState implements InputState {
+
+        public DefaultInputState () {
+            Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
+        }
+
+        @Override
+        public InputActionResult touchDown (int screenX, int screenY, int pointer, int button) {
+            if (ElectricitySimulator.WORLD.isScreenPosInWorld(screenX, screenY))
+                return InputActionResult.success(new PlacingInputState(screenX, screenY));
+            return InputActionResult.failure(this);
+        }
+
+        @Override
+        public InputActionResult keyDown (int code) {
+            // TODO: fix when we actually want the camera moving again
 //        if (Gdx.input.isKeyPressed(Input.Keys.W))
 //            ElectricitySimulator.cameraTranslate(0, 10);
 //
@@ -44,28 +91,8 @@ public class InputManager extends InputAdapter implements Module {
 //
 //        if (Gdx.input.isKeyPressed(Input.Keys.MINUS))
 //            ElectricitySimulator.cameraZoom(-0.1f);
-    }
 
-    @Override
-    public boolean touchDown (int screenX, int screenY, int pointer, int button) {
-        Vector2i coords = ElectricitySimulator.WORLD.coordinatesFromScreenPos(screenX, screenY);
-
-        // Add cube
-        Optional<UUID> optionalID = ElectricitySimulator.WORLD.objectAt(coords);
-
-        if (optionalID.isPresent()) {
-            ElectricitySimulator.WORLD.removeObject(optionalID.get());
-        } else {
-            WorldObject object = button == Input.Buttons.LEFT ?
-                    AllWorldObjects.CUBE.create(coords) :
-                    AllWorldObjects.CYLINDER.create(coords);
-
-            if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT))
-                object.getProperties().set("horizontal", true);
-
-            ElectricitySimulator.WORLD.addObject(object);
+            return InputActionResult.failure(this);
         }
-
-        return true;
     }
 }

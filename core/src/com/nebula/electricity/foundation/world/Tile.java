@@ -8,6 +8,6 @@ public class Tile {
     }
 
     public boolean isOccupied () {
-        return !hasWire;
+        return hasWire;
     }
 }

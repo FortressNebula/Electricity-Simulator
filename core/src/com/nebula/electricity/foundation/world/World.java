@@ -91,6 +91,7 @@ public class World implements Module {
     public <T extends WorldObject> boolean addObject (T object) {
         // Make sure position is valid
         if (!object.withinWorldBounds()) return false;
+        if (occupiedAt(object.getPos())) return false;
         allObjects.put(UUID.randomUUID(), object);
         return true;
     }
@@ -142,5 +143,9 @@ public class World implements Module {
 
     public Vector2i coordinatesFromScreenPos (Vector2 vec) {
         return coordinatesFromScreenPos(vec.x, vec.y);
+    }
+
+    public boolean isScreenPosInWorld (float x, float y) {
+        return coordinatesFromScreenPos(x, y).withinBounds(Constants.LIMITS.x, Constants.LIMITS.y);
     }
 }

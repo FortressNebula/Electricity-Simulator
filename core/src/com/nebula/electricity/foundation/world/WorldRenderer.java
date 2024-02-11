@@ -26,7 +26,6 @@ public class WorldRenderer implements Disposable {
 
     public void draw (SpriteBatch batch, Camera camera, int width, int height, Array<WorldObject> objects) {
         batch.setProjectionMatrix(camera.combined);
-        batch.begin();
         batch.setColor(Color.WHITE);
         // Draw tiles
         for (int y = width - 1; y >= 0; y--) {
@@ -42,7 +41,6 @@ public class WorldRenderer implements Disposable {
             }
         }
         for (WorldObject object : objects) object.draw(batch);
-        batch.end();
     }
 
     @Override

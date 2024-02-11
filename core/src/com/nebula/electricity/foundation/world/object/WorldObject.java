@@ -11,7 +11,7 @@ public abstract class WorldObject {
     protected Vector2i size;
     // Behavioural information
     protected WorldObjectProperties properties;
-    boolean isTicking;
+    protected boolean isTicking;
 
     // Graphics methods
     public void draw (SpriteBatch batch) {
@@ -34,12 +34,20 @@ public abstract class WorldObject {
         return true;
     }
 
-    public boolean withinWorldBounds () {
-        return position.withinBounds(Constants.WORLD_SIZE.x, Constants.WORLD_SIZE.y) &&
-                position.add(getSize()).add(-1).withinBounds(Constants.WORLD_SIZE.x, Constants.WORLD_SIZE.y);
+    public boolean withinWorldBounds (Vector2i at) {
+        return at.withinBounds(Constants.LIMITS.x, Constants.LIMITS.y) &&
+                at.add(getSize()).add(-1).withinBounds(Constants.LIMITS.x, Constants.LIMITS.y);
     }
+
+    public boolean withinWorldBounds () {
+        return withinWorldBounds(position);
+    }
+
     public Vector2i getPos () {
         return position;
+    }
+    public void setPos (Vector2i newPos) {
+        position = newPos;
     }
     protected abstract Vector2i getSize ();
 }
