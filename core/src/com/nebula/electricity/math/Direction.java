@@ -25,7 +25,7 @@ public enum Direction {
 
     public Direction cycle (int amount) {
         int index = ordinal() + amount;
-        return values()[index < 0 ? index + values().length : index];
+        return values()[index < 0 ? index + values().length : index % values().length];
     }
 
     public Direction next () {

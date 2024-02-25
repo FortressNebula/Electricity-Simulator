@@ -12,7 +12,7 @@ public class SimpleObject extends WorldObject {
     }
 
     @Override
-    protected Vector2i getSize () {
+    public Vector2i getSize () {
         return size;
     }
 }

@@ -1,54 +1,82 @@
 
 main.png
-size: 170, 45
+size: 236, 78
 format: RGBA8888
 filter: Linear, Nearest
 repeat: none
 background/dark
   rotate: false
-  xy: 103, 17
+  xy: 135, 5
   size: 32, 27
   orig: 32, 27
   offset: 0, 0
   index: -1
 background/dark_wall
   rotate: false
-  xy: 103, 7
+  xy: 203, 24
   size: 32, 8
   orig: 32, 8
   offset: 0, 0
   index: -1
 background/light
   rotate: false
-  xy: 137, 17
+  xy: 169, 5
   size: 32, 27
   orig: 32, 27
   offset: 0, 0
   index: -1
 background/light_wall
   rotate: false
-  xy: 137, 7
+  xy: 203, 14
   size: 32, 8
   orig: 32, 8
   offset: 0, 0
   index: -1
+objects/battery/down
+  rotate: false
+  xy: 1, 7
+  size: 32, 70
+  orig: 32, 70
+  offset: 0, 0
+  index: -1
+objects/battery/left
+  rotate: false
+  xy: 69, 40
+  size: 64, 37
+  orig: 64, 37
+  offset: 0, 0
+  index: -1
+objects/battery/right
+  rotate: false
+  xy: 69, 1
+  size: 64, 37
+  orig: 64, 37
+  offset: 0, 0
+  index: -1
+objects/battery/up
+  rotate: false
+  xy: 35, 7
+  size: 32, 70
+  orig: 32, 70
+  offset: 0, 0
+  index: -1
 objects/cube
   rotate: false
-  xy: 1, 1
+  xy: 135, 34
   size: 32, 43
   orig: 32, 43
   offset: 0, 0
   index: -1
 objects/cylinder/horizontal
   rotate: false
-  xy: 35, 1
+  xy: 169, 34
   size: 32, 43
   orig: 32, 43
   offset: 0, 0
   index: -1
 objects/cylinder/vertical
   rotate: false
-  xy: 69, 1
+  xy: 203, 34
   size: 32, 43
   orig: 32, 43
   offset: 0, 0

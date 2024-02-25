@@ -12,6 +12,7 @@ public abstract class WorldObject {
     // Behavioural information
     protected WorldObjectProperties properties;
     protected boolean isTicking;
+    protected String type;
 
     // Graphics methods
     public void draw (SpriteBatch batch) {
@@ -23,24 +24,30 @@ public abstract class WorldObject {
 
     // Property methods
     public WorldObjectProperties getProperties () { return properties; }
+    protected WorldObjectProperties initProperties () { return new WorldObjectProperties(); }
 
     // Collision methods
-    public boolean occupiedAt (Vector2i coords) {
-        if (coords.x < position.x) return false;
-        if (coords.y < position.y) return false;
-        if (coords.x > position.x + getSize().x - 1) return false;
-        if (coords.y > position.y + getSize().y - 1) return false;
+    public boolean occupiedAt (Vector2i pos) {
+        if (pos.x < position.x) return false;
+        if (pos.y < position.y) return false;
+        if (pos.x > position.x + getSize().x - 1) return false;
+        if (pos.y > position.y + getSize().y - 1) return false;
 
         return true;
     }
 
-    public boolean withinWorldBounds (Vector2i at) {
-        return at.withinBounds(Constants.LIMITS.x, Constants.LIMITS.y) &&
-                at.add(getSize()).add(-1).withinBounds(Constants.LIMITS.x, Constants.LIMITS.y);
+    public boolean intersectsWith (Vector2i pos, Vector2i size) {
+        if (pos.x + size.x - 1 < position.x) return false;
+        if (pos.y + size.y - 1 < position.y) return false;
+        if (pos.x > position.x + getSize().x - 1) return false;
+        if (pos.y > position.y + getSize().y - 1) return false;
+
+        return true;
     }
 
     public boolean withinWorldBounds () {
-        return withinWorldBounds(position);
+        return position.withinBounds(Constants.LIMITS.x, Constants.LIMITS.y) &&
+                position.add(getSize()).add(-1).withinBounds(Constants.LIMITS.x, Constants.LIMITS.y);
     }
 
     public Vector2i getPos () {
@@ -49,5 +56,5 @@ public abstract class WorldObject {
     public void setPos (Vector2i newPos) {
         position = newPos;
     }
-    protected abstract Vector2i getSize ();
+    public abstract Vector2i getSize ();
 }

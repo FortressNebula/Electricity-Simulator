@@ -1,6 +1,7 @@
 package com.nebula.electricity.foundation.input;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Cursor;
@@ -67,7 +68,7 @@ public class InputManager extends InputAdapter implements Module {
         @Override
         public InputActionResult touchDown (int screenX, int screenY, int pointer, int button) {
             if (ElectricitySimulator.WORLD.isScreenPosInWorld(screenX, screenY))
-                return InputActionResult.success(new PlacingInputState(screenX, screenY));
+                return InputActionResult.success(new PlacingInputState(screenX, screenY, button == Input.Buttons.MIDDLE));
             return InputActionResult.failure(this);
         }
 

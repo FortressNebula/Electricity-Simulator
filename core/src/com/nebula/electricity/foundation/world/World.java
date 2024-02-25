@@ -91,7 +91,7 @@ public class World implements Module {
     public <T extends WorldObject> boolean addObject (T object) {
         // Make sure position is valid
         if (!object.withinWorldBounds()) return false;
-        if (occupiedAt(object.getPos())) return false;
+        if (canPlace(object)) return false;
         allObjects.put(UUID.randomUUID(), object);
         return true;
     }
@@ -113,6 +113,15 @@ public class World implements Module {
     public boolean occupiedAt (Vector2i pos) {
         for (WorldObject obj : allObjects.values())
             if (obj.occupiedAt(pos)) return true;
+        return map[pos.x][pos.y].isOccupied();
+    }
+
+    public boolean canPlace (WorldObject object) {
+        return canPlace(object.getPos(), object.getSize());
+    }
+    public boolean canPlace (Vector2i pos, Vector2i size) {
+        for (WorldObject obj : allObjects.values())
+            if (obj.intersectsWith(pos, size)) return true;
         return map[pos.x][pos.y].isOccupied();
     }
 
