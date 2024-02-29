@@ -58,7 +58,7 @@ public class WorldObjectCreator<T extends WorldObject> {
     }
 
     public static class Factory<T extends WorldObject> {
-        String name;
+        String type;
         Supplier<T> builder;
 
         boolean isTicking;
@@ -68,8 +68,8 @@ public class WorldObjectCreator<T extends WorldObject> {
         Consumer<T> loadTextures;
         boolean areTexturesDefined;
 
-        private Factory (String name, Supplier<T> builder) {
-            this.name = name;
+        private Factory (String type, Supplier<T> builder) {
+            this.type = type;
             this.builder = builder;
 
             isTicking = false;
@@ -132,10 +132,10 @@ public class WorldObjectCreator<T extends WorldObject> {
         // Finish the factory
         public WorldObjectCreator<T> finished () {
             validate();
-            return new WorldObjectCreator<>(name, at -> {
+            return new WorldObjectCreator<>(type, at -> {
                 T object = builder.get();
 
-                object.type = name;
+                object.type = type;
                 object.isTicking = isTicking;
                 object.position = at;
                 object.size = size;

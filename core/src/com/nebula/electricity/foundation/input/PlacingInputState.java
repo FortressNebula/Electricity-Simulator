@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Cursor;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.nebula.electricity.ElectricitySimulator;
+import com.nebula.electricity.foundation.Constants;
 import com.nebula.electricity.foundation.world.object.WorldObject;
 import com.nebula.electricity.foundation.world.object.WorldObjectCreator;
 import com.nebula.electricity.math.Vector2i;
@@ -25,7 +26,7 @@ public class PlacingInputState implements InputState {
         currentIndex = getIndex(screenX, screenY, pick);
 
         resetObjectAt(ElectricitySimulator.WORLD.coordinatesFromScreenPos(screenX, screenY), false);
-        isValid = true;
+        isValid = currentObject.withinWorldBounds();
         Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Hand);
 
         alpha = 0f;
@@ -58,8 +59,8 @@ public class PlacingInputState implements InputState {
 
     @Override
     public void mouseMoved (int screenX, int screenY) {
-        Vector2i coords = ElectricitySimulator.WORLD.coordinatesFromScreenPos(screenX, screenY);
-        currentObject.setPos(coords);
+        Vector2i coords = currentObject.getPosFromCentrePos(ElectricitySimulator.unproject(screenX, screenY));
+        currentObject.setPos(coords.div(Constants.SCALED_TILE_SIZE));
         isValid = currentObject.withinWorldBounds();
     }
 
@@ -83,11 +84,8 @@ public class PlacingInputState implements InputState {
 
     @Override
     public InputActionResult touchDown (int screenX, int screenY, int pointer, int button) {
-        if (!isValid)
-            return fail();
-
-        if (button == Input.Buttons.LEFT)
-            return add(ElectricitySimulator.WORLD.coordinatesFromScreenPos(screenX, screenY));
+        if (button == Input.Buttons.LEFT && isValid)
+            return add(currentObject.getPos());
 
         if (button == Input.Buttons.RIGHT)
             return remove(ElectricitySimulator.WORLD.coordinatesFromScreenPos(screenX, screenY));
@@ -107,7 +105,7 @@ public class PlacingInputState implements InputState {
         if (!ElectricitySimulator.WORLD.occupiedAt(coords))
             return softFail();
 
-        Optional<UUID> id = ElectricitySimulator.WORLD.objectAt(currentObject.getPos());
+        Optional<UUID> id = ElectricitySimulator.WORLD.objectAt(coords);
         if (!id.isPresent())
             return softFail();
 
@@ -121,8 +119,11 @@ public class PlacingInputState implements InputState {
 
     private void resetObjectAt (Vector2i at, boolean withSameProperties) {
         WorldObject newObject = WorldObjectCreator.getCreatorFromIndex(currentIndex).create(at);
-        if (withSameProperties) newObject.getProperties().from(currentObject.getProperties());
+        if (withSameProperties)
+            newObject.getProperties().from(currentObject.getProperties());
+
         currentObject = newObject;
+        isValid = currentObject.withinWorldBounds();
     }
 
     private void resetObject () {

@@ -6,12 +6,14 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.nebula.electricity.foundation.Module;
 import com.nebula.electricity.foundation.events.Events;
 import com.nebula.electricity.content.world.AllWorldObjects;
 import com.nebula.electricity.foundation.input.InputManager;
 import com.nebula.electricity.foundation.world.World;
+import com.nebula.electricity.math.Vector2i;
 
 import java.util.Arrays;
 import java.util.Random;
@@ -119,6 +121,10 @@ public class ElectricitySimulator extends ApplicationAdapter {
 
 	public static OrthographicCamera getCamera () {
 		return getCamera(true);
+	}
+
+	public static Vector2i unproject (int screenX, int screenY) {
+		return new Vector2i(camera.unproject(new Vector3(screenX, screenY, 0)));
 	}
 
 	// Atlas utilities

@@ -42,7 +42,7 @@ public class WorldObjectProperties {
 
     // Getters
     public <T> T get (String name, Class<T> clazz) {
-        return (T) propertyMap.get(name);
+        return clazz.cast(propertyMap.get(name));
     }
     public boolean getBool (String name) {
         return get(name, Boolean.class);

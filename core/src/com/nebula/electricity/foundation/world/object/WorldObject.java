@@ -56,5 +56,14 @@ public abstract class WorldObject {
     public void setPos (Vector2i newPos) {
         position = newPos;
     }
+    public Vector2i getPosFromCentrePos (Vector2i unprojectedCoords) {
+        if (getSize() == Vector2i.ONE_BY_ONE) return unprojectedCoords;
+        return unprojectedCoords
+                .add(getSize()
+                        .mul(Constants.SCALED_TILE_SIZE)
+                        .div(-2) // Centre point
+                ).add(Constants.SCALED_TILE_SIZE.div(2)); // Fix
+    }
+
     public abstract Vector2i getSize ();
 }

@@ -1,6 +1,7 @@
 package com.nebula.electricity.math;
 
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector3;
 
 import java.util.Objects;
 
@@ -10,6 +11,10 @@ public class Vector2i {
     public static final Vector2i INVALID = new Vector2i(-1, -1);
 
     public int x, y;
+
+    public Vector2i (Vector3 v) {
+        this(v.x, v.y, true);
+    }
 
     public Vector2i (int x, int y) {
         this.x = x;
@@ -37,15 +42,15 @@ public class Vector2i {
 
     // Math methods
     public Vector2i swap () { return new Vector2i(y, x); }
-    public Vector2i mul (int s) {
-        return new Vector2i(x * s, y * s);
-    }
-    public Vector2i add (Vector2i v) {
-        return new Vector2i(x + v.x, y + v.y);
-    }
-    public Vector2i add (int s) {
-        return new Vector2i(x + s, y + s);
-    }
+
+    public Vector2i mul (int s) { return new Vector2i(x * s, y * s); }
+    public Vector2i mul (Vector2i v) { return new Vector2i(x * v.x, y * v.y); }
+
+    public Vector2i div (float s) { return new Vector2i(x / s, y / s, true); }
+    public Vector2i div (Vector2i v) { return new Vector2i((float) x / v.x, (float) y / v.y, true); }
+
+    public Vector2i add (Vector2i v) { return new Vector2i(x + v.x, y + v.y); }
+    public Vector2i add (int s) { return new Vector2i(x + s, y + s); }
 
     @Override
     public String toString () {

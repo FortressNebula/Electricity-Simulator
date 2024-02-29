@@ -2,8 +2,6 @@ package com.nebula.electricity.foundation.world;
 
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.badlogic.gdx.utils.OrderedMap;
@@ -111,6 +109,9 @@ public class World implements Module {
     }
 
     public boolean occupiedAt (Vector2i pos) {
+        if (!pos.withinBounds(Constants.LIMITS.x, Constants.LIMITS.y))
+            return true;
+
         for (WorldObject obj : allObjects.values())
             if (obj.occupiedAt(pos)) return true;
         return map[pos.x][pos.y].isOccupied();
@@ -145,16 +146,11 @@ public class World implements Module {
      * @param y the y position on the screen
      * @return the integer coordinates of the tile, with (0, 0) being in the bottom-left
      */
-    public Vector2i coordinatesFromScreenPos (float x, float y) {
-        Vector3 coords = ElectricitySimulator.getCamera(false).unproject(new Vector3(x, y, 0));
-        return new Vector2i(coords.x / Constants.SCALED_TILE_SIZE.x, coords.y / Constants.SCALED_TILE_SIZE.y, true);
+    public Vector2i coordinatesFromScreenPos (int x, int y) {
+        return ElectricitySimulator.unproject(x,y).div(Constants.SCALED_TILE_SIZE);
     }
 
-    public Vector2i coordinatesFromScreenPos (Vector2 vec) {
-        return coordinatesFromScreenPos(vec.x, vec.y);
-    }
-
-    public boolean isScreenPosInWorld (float x, float y) {
+    public boolean isScreenPosInWorld (int x, int y) {
         return coordinatesFromScreenPos(x, y).withinBounds(Constants.LIMITS.x, Constants.LIMITS.y);
     }
 }
