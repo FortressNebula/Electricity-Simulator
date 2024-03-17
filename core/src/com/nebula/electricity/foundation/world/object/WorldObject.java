@@ -14,10 +14,33 @@ public abstract class WorldObject {
     protected boolean isTicking;
     protected String type;
 
+    // Behavioural methods
+    public void onClick (boolean left) {}
+
     // Graphics methods
     public void draw (SpriteBatch batch) {
-        batch.draw(getTexture(), position.x * Constants.SCALED_TILE_SIZE.x, position.y * Constants.SCALED_TILE_SIZE.y,
-                getTexture().originalWidth * Constants.SCALE, getTexture().originalHeight * Constants.SCALE);
+        drawObjectTexture(batch, getTexture());
+    }
+
+    /**
+     * Special function called when drawing the ghost of an object for the object placement manager. Should not modify the batch's colour.
+     * @param batch the sprite batch
+     */
+    public void drawGhost (SpriteBatch batch) {
+        draw(batch);
+    }
+
+    protected void drawObjectTexture(SpriteBatch batch, TextureAtlas.AtlasRegion texture) {
+        batch.draw(texture, position.x * Constants.SCALED_TILE_SIZE.x, position.y * Constants.SCALED_TILE_SIZE.y,
+                texture.originalWidth * Constants.SCALE, texture.originalHeight * Constants.SCALE);
+    }
+
+    protected void drawObjectTexture(SpriteBatch batch, TextureAtlas.AtlasRegion texture, Vector2i offset) {
+        batch.draw(texture,
+                position.x * Constants.SCALED_TILE_SIZE.x + Constants.SCALE * offset.x,
+                position.y * Constants.SCALED_TILE_SIZE.y + Constants.SCALE * offset.y,
+                texture.originalWidth * Constants.SCALE,
+                texture.originalHeight * Constants.SCALE);
     }
 
     protected abstract TextureAtlas.AtlasRegion getTexture ();
@@ -56,6 +79,7 @@ public abstract class WorldObject {
     public void setPos (Vector2i newPos) {
         position = newPos;
     }
+
     public Vector2i getPosFromCentrePos (Vector2i unprojectedCoords) {
         if (getSize() == Vector2i.ONE_BY_ONE) return unprojectedCoords;
         return unprojectedCoords

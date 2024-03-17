@@ -63,16 +63,6 @@ public class World implements Module {
     }
 
     @Override
-    public boolean doesDraw () {
-        return true;
-    }
-
-    @Override
-    public void update () {
-
-    }
-
-    @Override
     public void draw (SpriteBatch batch, Camera camera) {
         Array<WorldObject> objects = allObjects.values().toArray();
         objects.sort(Comparator.comparingInt(a -> -a.getPos().y));
@@ -102,7 +92,12 @@ public class World implements Module {
         return allObjects.remove(id) != null;
     }
 
+    public void clearObjects () { allObjects.clear(); }
+
     public Optional<UUID> objectAt (Vector2i pos) {
+        if (!pos.withinBounds(Constants.LIMITS.x, Constants.LIMITS.y))
+            return Optional.empty();
+
         for (ObjectMap.Entry<UUID, WorldObject> entry : allObjects.iterator())
             if (entry.value.occupiedAt(pos)) return Optional.of(entry.key);
         return Optional.empty();
@@ -142,15 +137,11 @@ public class World implements Module {
 
     /**
      * Outputs tile coordinates from a given screen position
-     * @param x the x position on the screen
-     * @param y the y position on the screen
+     * @param pos the mouse position on the screen
      * @return the integer coordinates of the tile, with (0, 0) being in the bottom-left
      */
-    public Vector2i coordinatesFromScreenPos (int x, int y) {
-        return ElectricitySimulator.unproject(x,y).div(Constants.SCALED_TILE_SIZE);
-    }
 
-    public boolean isScreenPosInWorld (int x, int y) {
-        return coordinatesFromScreenPos(x, y).withinBounds(Constants.LIMITS.x, Constants.LIMITS.y);
+    public Vector2i coordinatesFromScreenPos (Vector2i pos) {
+        return ElectricitySimulator.unproject(pos).div(Constants.SCALED_TILE_SIZE);
     }
 }

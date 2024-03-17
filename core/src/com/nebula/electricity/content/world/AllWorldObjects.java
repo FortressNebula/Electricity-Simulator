@@ -1,6 +1,7 @@
 package com.nebula.electricity.content.world;
 
 import com.nebula.electricity.content.world.object.AxisObject;
+import com.nebula.electricity.content.world.object.BulbObject;
 import com.nebula.electricity.content.world.object.DirectionalObject;
 import com.nebula.electricity.foundation.world.object.SimpleObject;
 import com.nebula.electricity.foundation.world.object.WorldObjectCreator;
@@ -19,6 +20,10 @@ public class AllWorldObjects {
    public static final WorldObjectCreator<DirectionalObject> BATTERY = WorldObjectCreator.create("battery", DirectionalObject::new)
            .withTextures(DirectionalObject.textures("battery"))
            .withSize(2, 1)
+           .finished();
+   public static final WorldObjectCreator<BulbObject> BULB = WorldObjectCreator.create("bulb", BulbObject::new)
+           .withTextures(BulbObject.textures("bulb"))
+           .oneByOne()
            .finished();
 
     public static void register () {}

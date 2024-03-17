@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.nebula.electricity.foundation.Module;
@@ -22,7 +23,7 @@ import java.util.Random;
  * Main class that handles all the modules of the simulator
  * Responsible for rendering modules with attachered renderers, and disposing them too
  */
-@SuppressWarnings("GDXJavaStaticResource")
+@SuppressWarnings({"GDXJavaStaticResource", "unused"})
 public class ElectricitySimulator extends ApplicationAdapter {
 	// All modules
 	public static Module[] MODULES = new Module[]{};
@@ -35,6 +36,7 @@ public class ElectricitySimulator extends ApplicationAdapter {
 	private static TextureAtlas atlas;
 	private static SpriteBatch batch;
 	private static OrthographicCamera camera;
+	private static OrthographicCamera guiCamera; // READ-ONLY
 	private static boolean isCameraDirty;
 
 	// General utilities
@@ -48,6 +50,8 @@ public class ElectricitySimulator extends ApplicationAdapter {
 		// Initialise rendering tools
 		batch = new SpriteBatch();
 		camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		guiCamera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		guiCamera.translate(Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.5f);
 		atlas = new TextureAtlas("atlases/main.atlas");
 		// Init all the modules
 		for (Module m : MODULES)
@@ -64,15 +68,28 @@ public class ElectricitySimulator extends ApplicationAdapter {
 	 */
 	@Override
 	public void render () {
+		// Update all modules
 		for (Module m : MODULES)
 			m.update();
 
-		if (isCameraDirty) camera.update();
+		if (isCameraDirty) {
+			camera.zoom = MathUtils.clamp(camera.zoom, 0.1F, 2F);
+			camera.update();
+		}
 
+		// Draw all modules
 		ScreenUtils.clear(BACKGROUND_COLOUR);
 		batch.begin();
 		for (Module m : MODULES)
-			if (m.doesDraw()) m.draw(batch, camera);
+			m.draw(batch, camera);
+		batch.end();
+
+		// Draw GUI
+		batch.begin();
+		batch.setProjectionMatrix(guiCamera.combined);
+		batch.setColor(1,1,1,1);
+		for (Module m : MODULES)
+			m.drawGUI(batch);
 		batch.end();
 	}
 
@@ -83,9 +100,13 @@ public class ElectricitySimulator extends ApplicationAdapter {
 	 */
 	@Override
 	public void resize (int width, int height) {
+		// Update main camera used by world
 		camera.viewportWidth = width;
 		camera.viewportHeight = height;
 		camera.update();
+
+		// Update GUI camera used by input manager
+		guiCamera.setToOrtho(false, width, height);
 	}
 
 	/**
@@ -123,8 +144,8 @@ public class ElectricitySimulator extends ApplicationAdapter {
 		return getCamera(true);
 	}
 
-	public static Vector2i unproject (int screenX, int screenY) {
-		return new Vector2i(camera.unproject(new Vector3(screenX, screenY, 0)));
+	public static Vector2i unproject (Vector2i screenPos) {
+		return new Vector2i(camera.unproject(new Vector3(screenPos.x, screenPos.y, 0)));
 	}
 
 	// Atlas utilities
@@ -132,8 +153,11 @@ public class ElectricitySimulator extends ApplicationAdapter {
 	public static TextureAtlas.AtlasRegion getTexture (String name) {
 		return atlas.findRegion(name);
 	}
-
 	public static TextureAtlas.AtlasRegion getObjectTexture (String name) {
 		return atlas.findRegion("objects/" + name);
 	}
+	public static TextureAtlas.AtlasRegion getGUITexture (String name) {
+		return atlas.findRegion("gui/" + name);
+	}
+
 }

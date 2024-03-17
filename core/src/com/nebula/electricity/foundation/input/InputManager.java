@@ -6,26 +6,75 @@ import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Cursor;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.nebula.electricity.ElectricitySimulator;
 import com.nebula.electricity.foundation.Module;
+import com.nebula.electricity.math.Vector2i;
+
+import java.util.Optional;
+import java.util.UUID;
+import java.util.function.Function;
 
 public class InputManager extends InputAdapter implements Module {
+    InputStates hoveringOverState;
+    InputStates selectedState;
     InputState state;
+
+    TextureAtlas.AtlasRegion guiBackground;
+    TextureAtlas.AtlasRegion guiCorner;
+    TextureAtlas.AtlasRegion hoverOverlay;
 
     @Override
     public void init () {
-        state = new DefaultInputState();
         Gdx.input.setInputProcessor(this);
-    }
 
-    @Override
-    public boolean doesDraw () {
-        return true;
+        state = new DefaultInputState();
+        hoveringOverState = null;
+        selectedState = InputStates.DEFAULT;
+        InputStates.register();
+
+        guiBackground = ElectricitySimulator.getGUITexture("bg");
+        guiCorner = ElectricitySimulator.getGUITexture("bg_corner");
+        hoverOverlay = ElectricitySimulator.getGUITexture("hover_overlay");
     }
 
     @Override
     public void draw (SpriteBatch batch, Camera camera) {
         state.draw(batch, camera);
+    }
+
+    @Override
+    public void drawGUI (SpriteBatch batch) {
+        // Draw the GUI
+        // Background
+        batch.draw(guiBackground, Gdx.graphics.getWidth() - InputStates.values().length*120, 0,
+                InputStates.values().length * 120, 120);
+        batch.draw(guiCorner, Gdx.graphics.getWidth() - InputStates.values().length*120 - 120, 0,
+                120, 120);
+        // Buttons
+        for (InputStates state : InputStates.values()) {
+            batch.draw(state.region, Gdx.graphics.getWidth() - state.position.x, state.position.y,
+                    80, 80);
+
+            if (state == selectedState) {
+                // Draw select overlay
+                batch.setColor(1, 1, 1, 0.3f);
+                batch.draw(hoverOverlay, Gdx.graphics.getWidth() - state.position.x - 10, state.position.y - 10,
+                        100, 100);
+                batch.setColor(1, 1, 1, 1);
+                continue;
+            }
+
+            if (state == hoveringOverState) {
+                // Draw hover overlay
+                batch.setColor(1, 1, 1, Gdx.input.isButtonPressed(Input.Buttons.LEFT) ? 0.5f : 0.2f);
+                batch.draw(hoverOverlay, Gdx.graphics.getWidth() - state.position.x - 10, state.position.y - 10,
+                        100, 100);
+                batch.setColor(1, 1, 1, 1);
+            }
+        }
+
+        state.drawGUI(batch);
     }
 
     @Override
@@ -35,22 +84,43 @@ public class InputManager extends InputAdapter implements Module {
 
     @Override
     public boolean touchDown (int screenX, int screenY, int pointer, int button) {
-        InputActionResult result = state.touchDown(screenX, screenY, pointer, button);
-        state = result.getNewMode();
-        return result.wasSuccessful();
+        // Button mechanics
+        if (hoveringOverState != null) {
+            selectedState = hoveringOverState;
+            state = selectedState.create(screenX, screenY);
+        }
+
+        return state.touchDown(new Vector2i(screenX, screenY), pointer, button);
     }
 
     @Override
     public boolean mouseMoved (int screenX, int screenY) {
-        state.mouseMoved(screenX, screenY);
+        Vector2i pos = new Vector2i(screenX, screenY);
+        state.mouseMoved(pos);
+
+        // Button mechanics
+        pos.x = Gdx.graphics.getWidth() - pos.x;
+        pos.y = Gdx.graphics.getHeight() - pos.y;
+
+        if (pos.y > 120) {
+            hoveringOverState = null;
+            return false;
+        }
+
+        for (InputStates state : InputStates.values()) {
+            if (pos.withinBounds(state.position.x - 90, state.position.y - 10, state.position.x + 10, state.position.y + 90)) {
+                hoveringOverState = state;
+                return false;
+            }
+        }
+
+        hoveringOverState = null;
         return false;
     }
 
     @Override
     public boolean keyDown (int keycode) {
-        InputActionResult result = state.keyDown(keycode);
-        state = result.getNewMode();
-        return result.wasSuccessful();
+        return state.keyDown(keycode);
     }
 
     @Override
@@ -59,41 +129,66 @@ public class InputManager extends InputAdapter implements Module {
         return false;
     }
 
-    static class DefaultInputState implements InputState {
+    static class DefaultInputState extends InputState {
 
         public DefaultInputState () {
             Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
         }
 
-        @Override
-        public InputActionResult touchDown (int screenX, int screenY, int pointer, int button) {
-            if (ElectricitySimulator.WORLD.isScreenPosInWorld(screenX, screenY))
-                return InputActionResult.success(new PlacingInputState(screenX, screenY, button == Input.Buttons.MIDDLE));
-            return InputActionResult.failure(this);
+        public DefaultInputState (Vector2i pos) {
+            this();
         }
 
         @Override
-        public InputActionResult keyDown (int code) {
-            // TODO: fix when we actually want the camera moving again
-//        if (Gdx.input.isKeyPressed(Input.Keys.W))
-//            ElectricitySimulator.cameraTranslate(0, 10);
-//
-//        if (Gdx.input.isKeyPressed(Input.Keys.S))
-//            ElectricitySimulator.cameraTranslate(0, -10);
-//
-//        if (Gdx.input.isKeyPressed(Input.Keys.A))
-//            ElectricitySimulator.cameraTranslate(-10, 0);
-//
-//        if (Gdx.input.isKeyPressed(Input.Keys.D))
-//            ElectricitySimulator.cameraTranslate(10, 0);
-//
-//        if (Gdx.input.isKeyPressed(Input.Keys.EQUALS))
-//            ElectricitySimulator.cameraZoom(0.1f);
-//
-//        if (Gdx.input.isKeyPressed(Input.Keys.MINUS))
-//            ElectricitySimulator.cameraZoom(-0.1f);
+        public boolean touchDown (Vector2i screenPos, int pointer, int button) {
+            // Did we click on an object?
+            Optional<UUID> id = ElectricitySimulator.WORLD.objectAt(
+                    ElectricitySimulator.WORLD.coordinatesFromScreenPos(screenPos));
 
-            return InputActionResult.failure(this);
+            if (id.isPresent()) {
+                // Yes, let it know
+                ElectricitySimulator.WORLD.getObject(id.get()).onClick(button == Input.Buttons.LEFT);
+                return true;
+            }
+
+            return false;
+        }
+
+        @Override
+        public boolean keyDown (int code) {
+            return false;
+        }
+    }
+
+    public enum InputStates {
+        PANNING("panning", PanningInputState::new),
+        PLACING("placing", PlacingInputState::new),
+        DEFAULT("default", DefaultInputState::new)
+        ;
+        final String textureName;
+        final Function<Vector2i, InputState> factory;
+        TextureAtlas.AtlasRegion region;
+        // Collision bounding box
+        Vector2i position;
+
+        InputStates (String textureName, Function<Vector2i, InputState> factory) {
+            this.textureName = textureName;
+            this.factory = factory;
+        }
+
+        private void init (int selfIndex) {
+            region = ElectricitySimulator.getGUITexture(textureName);
+            position = new Vector2i(120 * selfIndex + 100, 20);
+        }
+
+        InputState create (int screenX, int screenY) {
+            return factory.apply(new Vector2i(screenX, screenY));
+        }
+
+        private static void register () {
+            for (int i = 0; i < values().length; i++) {
+                values()[i].init(i);
+            }
         }
     }
 }

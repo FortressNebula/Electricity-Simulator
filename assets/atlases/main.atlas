@@ -1,82 +1,152 @@
 
 main.png
-size: 236, 78
+size: 390, 78
 format: RGBA8888
 filter: Linear, Nearest
 repeat: none
 background/dark
   rotate: false
-  xy: 135, 5
+  xy: 269, 5
   size: 32, 27
   orig: 32, 27
   offset: 0, 0
   index: -1
 background/dark_wall
   rotate: false
-  xy: 203, 24
+  xy: 1, 3
   size: 32, 8
   orig: 32, 8
   offset: 0, 0
   index: -1
 background/light
   rotate: false
-  xy: 169, 5
+  xy: 303, 5
   size: 32, 27
   orig: 32, 27
   offset: 0, 0
   index: -1
 background/light_wall
   rotate: false
-  xy: 203, 14
+  xy: 227, 17
   size: 32, 8
   orig: 32, 8
   offset: 0, 0
   index: -1
+gui/bg
+  rotate: false
+  xy: 371, 61
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+gui/bg_corner
+  rotate: false
+  xy: 201, 1
+  size: 24, 24
+  orig: 24, 24
+  offset: 0, 0
+  index: -1
+gui/default
+  rotate: false
+  xy: 337, 16
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+gui/hover_overlay
+  rotate: false
+  xy: 371, 43
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+gui/panning
+  rotate: false
+  xy: 355, 16
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+gui/placing
+  rotate: false
+  xy: 373, 25
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+gui/wiring
+  rotate: false
+  xy: 373, 7
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
 objects/battery/down
   rotate: false
-  xy: 1, 7
+  xy: 133, 7
   size: 32, 70
   orig: 32, 70
   offset: 0, 0
   index: -1
 objects/battery/left
   rotate: false
-  xy: 69, 40
+  xy: 67, 40
   size: 64, 37
   orig: 64, 37
   offset: 0, 0
   index: -1
 objects/battery/right
   rotate: false
-  xy: 69, 1
+  xy: 67, 1
   size: 64, 37
   orig: 64, 37
   offset: 0, 0
   index: -1
 objects/battery/up
   rotate: false
-  xy: 35, 7
+  xy: 167, 7
   size: 32, 70
   orig: 32, 70
   offset: 0, 0
   index: -1
+objects/bulb/bulb
+  rotate: false
+  xy: 201, 27
+  size: 32, 50
+  orig: 32, 50
+  offset: 0, 0
+  index: -1
+objects/bulb/glass
+  rotate: false
+  xy: 235, 27
+  size: 32, 50
+  orig: 32, 50
+  offset: 0, 0
+  index: -1
+objects/bulb/glow
+  rotate: false
+  xy: 1, 13
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
 objects/cube
   rotate: false
-  xy: 135, 34
+  xy: 269, 34
   size: 32, 43
   orig: 32, 43
   offset: 0, 0
   index: -1
 objects/cylinder/horizontal
   rotate: false
-  xy: 169, 34
+  xy: 303, 34
   size: 32, 43
   orig: 32, 43
   offset: 0, 0
   index: -1
 objects/cylinder/vertical
   rotate: false
-  xy: 203, 34
+  xy: 337, 34
   size: 32, 43
   orig: 32, 43
   offset: 0, 0

@@ -4,7 +4,7 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.nebula.electricity.math.Vector2i;
 
 public class SimpleObject extends WorldObject {
-    TextureAtlas.AtlasRegion texture;
+    protected TextureAtlas.AtlasRegion texture;
 
     @Override
     protected TextureAtlas.AtlasRegion getTexture () {

@@ -14,7 +14,7 @@ import com.nebula.electricity.math.Vector2i;
 import java.util.Optional;
 import java.util.UUID;
 
-public class PlacingInputState implements InputState {
+public class PlacingInputState extends InputState {
     int currentIndex;
     WorldObject currentObject;
     boolean isValid;
@@ -22,26 +22,14 @@ public class PlacingInputState implements InputState {
     float alpha;
     int frameCounter;
 
-    public PlacingInputState (int screenX, int screenY, boolean pick) {
-        currentIndex = getIndex(screenX, screenY, pick);
+    public PlacingInputState (Vector2i screenPos) {
+        currentIndex = 0;
 
-        resetObjectAt(ElectricitySimulator.WORLD.coordinatesFromScreenPos(screenX, screenY), false);
+        resetObjectAt(ElectricitySimulator.WORLD.coordinatesFromScreenPos(screenPos), false);
         isValid = currentObject.withinWorldBounds();
         Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Hand);
 
         alpha = 0f;
-    }
-
-    private int getIndex (int screenX, int screenY, boolean pick) {
-        if (!pick)
-            return 0;
-
-        Optional<UUID> id =
-                ElectricitySimulator.WORLD.objectAt(ElectricitySimulator.WORLD.coordinatesFromScreenPos(screenX, screenY));
-        return id
-                .map(uuid -> WorldObjectCreator.getIndexFomObject(ElectricitySimulator.WORLD.getObject(uuid)))
-                .orElse(0);
-
     }
 
     @Override
@@ -53,66 +41,78 @@ public class PlacingInputState implements InputState {
     public void draw (SpriteBatch batch, Camera camera) {
         batch.setProjectionMatrix(camera.combined);
         batch.setColor(isValid ? 0.1f : 1, isValid ? 1 : 0.1f, 0.2f, alpha / 2);
-        currentObject.draw(batch);
+        currentObject.drawGhost(batch);
         batch.setColor(1, 1, 1, 1);
     }
 
     @Override
-    public void mouseMoved (int screenX, int screenY) {
-        Vector2i coords = currentObject.getPosFromCentrePos(ElectricitySimulator.unproject(screenX, screenY));
+    public void mouseMoved (Vector2i screenPos) {
+        Vector2i coords = currentObject.getPosFromCentrePos(ElectricitySimulator.unproject(screenPos));
         currentObject.setPos(coords.div(Constants.SCALED_TILE_SIZE));
         isValid = currentObject.withinWorldBounds();
     }
 
     @Override
-    public InputActionResult keyDown (int code) {
+    public boolean keyDown (int code) {
         if (code == Input.Keys.UP || code == Input.Keys.DOWN) {
             currentIndex += (code == Input.Keys.UP ? 1 : -1) + WorldObjectCreator.getNumCreators();
             currentIndex = currentIndex % WorldObjectCreator.getNumCreators();
 
             resetObject();
-            return InputActionResult.success(this);
+            return true;
         }
 
         if (code == Input.Keys.LEFT || code == Input.Keys.RIGHT) {
             currentObject.getProperties().rotateIfPossible(code == Input.Keys.LEFT);
-            return InputActionResult.success(this);
+            return true;
         }
 
-        return InputActionResult.failure(this);
+        if (code == Input.Keys.R) {
+            ElectricitySimulator.WORLD.clearObjects();
+        }
+
+        return false;
     }
 
     @Override
-    public InputActionResult touchDown (int screenX, int screenY, int pointer, int button) {
+    public boolean touchDown (Vector2i screenPos, int pointer, int button) {
         if (button == Input.Buttons.LEFT && isValid)
             return add(currentObject.getPos());
 
         if (button == Input.Buttons.RIGHT)
-            return remove(ElectricitySimulator.WORLD.coordinatesFromScreenPos(screenX, screenY));
+            return remove(ElectricitySimulator.WORLD.coordinatesFromScreenPos(screenPos));
 
-        return fail();
+        if (button == Input.Buttons.MIDDLE)
+            return pick(ElectricitySimulator.WORLD.coordinatesFromScreenPos(screenPos));
+
+        return false;
     }
 
-    private InputActionResult add (Vector2i coords) {
+    private boolean add (Vector2i coords) {
         if (!ElectricitySimulator.WORLD.addObject(currentObject))
-            return softFail();
+            return false;
 
         resetObjectAt(coords, true);
-        return success();
+        return true;
     }
 
-    private InputActionResult remove (Vector2i coords) {
+    private boolean remove (Vector2i coords) {
         if (!ElectricitySimulator.WORLD.occupiedAt(coords))
-            return softFail();
+            return false;
 
         Optional<UUID> id = ElectricitySimulator.WORLD.objectAt(coords);
         if (!id.isPresent())
-            return softFail();
+            return false;
 
-        if (!ElectricitySimulator.WORLD.removeObject(id.get()))
-            return softFail();
+        return ElectricitySimulator.WORLD.removeObject(id.get());
+    }
 
-        return success();
+    private boolean pick (Vector2i coords) {
+        currentIndex = ElectricitySimulator.WORLD.objectAt(coords)
+                        .map(uuid -> WorldObjectCreator.getIndexFomObject(ElectricitySimulator.WORLD.getObject(uuid)))
+                        .orElse(currentIndex);
+
+        return true;
     }
 
     // Utility methods to make it easier to reset the object
@@ -128,19 +128,5 @@ public class PlacingInputState implements InputState {
 
     private void resetObject () {
         resetObjectAt(currentObject.getPos(), false);
-    }
-
-    // Utility methods to make it easier to return an action result
-
-    private InputActionResult fail () {
-        return InputActionResult.failure(new InputManager.DefaultInputState());
-    }
-
-    private InputActionResult softFail () {
-        return InputActionResult.failure(this);
-    }
-
-    private InputActionResult success () {
-        return InputActionResult.success(this);
     }
 }
