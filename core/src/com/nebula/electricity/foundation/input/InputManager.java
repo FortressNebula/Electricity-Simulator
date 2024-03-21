@@ -4,22 +4,22 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.graphics.Camera;
-import com.badlogic.gdx.graphics.Cursor;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.nebula.electricity.ElectricitySimulator;
 import com.nebula.electricity.foundation.Module;
 import com.nebula.electricity.math.Vector2i;
 
-import java.util.Optional;
-import java.util.UUID;
 import java.util.function.Function;
 
 public class InputManager extends InputAdapter implements Module {
+    // State-machine
     InputStates hoveringOverState;
     InputStates selectedState;
     InputState state;
 
+    // Textures
     TextureAtlas.AtlasRegion guiBackground;
     TextureAtlas.AtlasRegion guiCorner;
     TextureAtlas.AtlasRegion hoverOverlay;
@@ -27,11 +27,11 @@ public class InputManager extends InputAdapter implements Module {
     @Override
     public void init () {
         Gdx.input.setInputProcessor(this);
+        InputStates.register();
 
         state = new DefaultInputState();
         hoveringOverState = null;
         selectedState = InputStates.DEFAULT;
-        InputStates.register();
 
         guiBackground = ElectricitySimulator.getGUITexture("bg");
         guiCorner = ElectricitySimulator.getGUITexture("bg_corner");
@@ -44,7 +44,7 @@ public class InputManager extends InputAdapter implements Module {
     }
 
     @Override
-    public void drawGUI (SpriteBatch batch) {
+    public void drawGUI (SpriteBatch batch, ShapeRenderer shapes) {
         // Draw the GUI
         // Background
         batch.draw(guiBackground, Gdx.graphics.getWidth() - InputStates.values().length*120, 0,
@@ -74,7 +74,7 @@ public class InputManager extends InputAdapter implements Module {
             }
         }
 
-        state.drawGUI(batch);
+        state.drawGUI(batch, shapes);
     }
 
     @Override
@@ -91,6 +91,17 @@ public class InputManager extends InputAdapter implements Module {
         }
 
         return state.touchDown(new Vector2i(screenX, screenY), pointer, button);
+    }
+
+    @Override
+    public boolean touchDragged (int screenX, int screenY, int pointer) {
+        state.touchDragged(new Vector2i(screenX, screenY), pointer);
+        return false;
+    }
+
+    @Override
+    public boolean touchUp (int screenX, int screenY, int pointer, int button) {
+        return state.touchUp(new Vector2i(screenX, screenY), pointer, button);
     }
 
     @Override
@@ -129,39 +140,9 @@ public class InputManager extends InputAdapter implements Module {
         return false;
     }
 
-    static class DefaultInputState extends InputState {
-
-        public DefaultInputState () {
-            Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
-        }
-
-        public DefaultInputState (Vector2i pos) {
-            this();
-        }
-
-        @Override
-        public boolean touchDown (Vector2i screenPos, int pointer, int button) {
-            // Did we click on an object?
-            Optional<UUID> id = ElectricitySimulator.WORLD.objectAt(
-                    ElectricitySimulator.WORLD.coordinatesFromScreenPos(screenPos));
-
-            if (id.isPresent()) {
-                // Yes, let it know
-                ElectricitySimulator.WORLD.getObject(id.get()).onClick(button == Input.Buttons.LEFT);
-                return true;
-            }
-
-            return false;
-        }
-
-        @Override
-        public boolean keyDown (int code) {
-            return false;
-        }
-    }
-
     public enum InputStates {
         PANNING("panning", PanningInputState::new),
+        WIRING ( "wiring",  WiringInputState::new),
         PLACING("placing", PlacingInputState::new),
         DEFAULT("default", DefaultInputState::new)
         ;

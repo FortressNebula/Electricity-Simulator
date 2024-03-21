@@ -41,6 +41,7 @@ public class Vector2i {
     public boolean isValid () { return x >= 0 && y >= 0; }
 
     // Math methods
+    public Vector2i cpy () { return new Vector2i(x, y); }
     public Vector2i swap () { return new Vector2i(y, x); }
 
     public Vector2i mul (int s) { return new Vector2i(x * s, y * s); }
