@@ -2,7 +2,6 @@ package com.nebula.electricity.foundation.input;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Cursor;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.nebula.electricity.ElectricitySimulator;
@@ -38,8 +37,7 @@ public class PlacingInputState extends InputState {
     }
 
     @Override
-    public void draw (SpriteBatch batch, Camera camera) {
-        batch.setProjectionMatrix(camera.combined);
+    public void draw (SpriteBatch batch) {
         batch.setColor(isValid ? 0.1f : 1, isValid ? 1 : 0.1f, 0.2f, alpha / 2);
         currentObject.drawGhost(batch);
         batch.setColor(1, 1, 1, 1);

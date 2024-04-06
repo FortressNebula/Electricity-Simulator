@@ -34,7 +34,7 @@ public class DirectionalObject extends WorldObject {
 
     @Override
     public Vector2i getSize () {
-        return properties.getDirection().rotate(size);
+        return properties.getDirection().fakeRotate(size);
     }
 
     // Texture utils

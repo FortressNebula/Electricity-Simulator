@@ -1,6 +1,5 @@
 package com.nebula.electricity.foundation.world;
 
-import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
@@ -14,7 +13,7 @@ import com.nebula.electricity.math.Vector2i;
 import java.util.Comparator;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 /**
  * Stores all information about the simulation world
@@ -25,7 +24,6 @@ public class World implements Module {
     private WorldRenderer renderer;
     // Map information
     private int width, height;
-    private Tile[][] map;
     // Objects
     private OrderedMap<UUID, WorldObject> allObjects;
     // DEBUG
@@ -45,15 +43,12 @@ public class World implements Module {
         // Populate map with tiles
         this.width = Constants.WORLD_SIZE.x;
         this.height = Constants.WORLD_SIZE.y;
-        map = new Tile[width][height];
 
         // Initialise object map
         allObjects = new OrderedMap<>();
 
         // Selected coordinate
         selectedCoord = new Vector2i(-1, -1);
-
-        forEach((x, y) -> map[x][y] = new Tile());
 
         // Centre camera position
         ElectricitySimulator.getCamera().translate(
@@ -63,10 +58,10 @@ public class World implements Module {
     }
 
     @Override
-    public void draw (SpriteBatch batch, Camera camera) {
+    public void draw (SpriteBatch batch) {
         Array<WorldObject> objects = allObjects.values().toArray();
         objects.sort(Comparator.comparingInt(a -> -a.getPos().y));
-        renderer.draw(batch, camera, width, height, objects);
+        renderer.draw(batch, width, height, objects);
     }
 
     @Override
@@ -75,11 +70,17 @@ public class World implements Module {
     }
 
     // Object methods
+    public Array<WorldObject> getAllObjects () { return allObjects.values().toArray(); }
+
+    public void forEachObject (Consumer<WorldObject> func) {
+        allObjects.forEach(entry -> func.accept(entry.value));
+    }
 
     public <T extends WorldObject> boolean addObject (T object) {
         // Make sure position is valid
         if (!object.withinWorldBounds()) return false;
         if (canPlace(object)) return false;
+        object.setElectricHandler(object.makeElectricHandler());
         allObjects.put(UUID.randomUUID(), object);
         return true;
     }
@@ -109,7 +110,7 @@ public class World implements Module {
 
         for (WorldObject obj : allObjects.values())
             if (obj.occupiedAt(pos)) return true;
-        return map[pos.x][pos.y].isOccupied();
+        return false;
     }
 
     public boolean canPlace (WorldObject object) {
@@ -118,22 +119,10 @@ public class World implements Module {
     public boolean canPlace (Vector2i pos, Vector2i size) {
         for (WorldObject obj : allObjects.values())
             if (obj.intersectsWith(pos, size)) return true;
-        return map[pos.x][pos.y].isOccupied();
+        return false;
     }
 
     // Utility methods
-
-    /**
-     * Iterates over every tile in the map
-     * @param cons A consumer, taking in (x, y) coordinates as inputs
-     */
-    public void forEach (BiConsumer<Integer, Integer> cons) {
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                cons.accept(x, y);
-            }
-        }
-    }
 
     /**
      * Outputs tile coordinates from a given screen position

@@ -3,10 +3,8 @@ package com.nebula.electricity.foundation.input;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputAdapter;
-import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.nebula.electricity.ElectricitySimulator;
 import com.nebula.electricity.foundation.Module;
 import com.nebula.electricity.math.Vector2i;
@@ -39,12 +37,12 @@ public class InputManager extends InputAdapter implements Module {
     }
 
     @Override
-    public void draw (SpriteBatch batch, Camera camera) {
-        state.draw(batch, camera);
+    public void draw (SpriteBatch batch) {
+        state.draw(batch);
     }
 
     @Override
-    public void drawGUI (SpriteBatch batch, ShapeRenderer shapes) {
+    public void drawGUI (SpriteBatch batch) {
         // Draw the GUI
         // Background
         batch.draw(guiBackground, Gdx.graphics.getWidth() - InputStates.values().length*120, 0,
@@ -74,7 +72,7 @@ public class InputManager extends InputAdapter implements Module {
             }
         }
 
-        state.drawGUI(batch, shapes);
+        state.drawGUI(batch);
     }
 
     @Override

@@ -60,6 +60,13 @@ gui/hover_overlay
   orig: 16, 16
   offset: 0, 0
   index: -1
+gui/open_connection
+  rotate: false
+  xy: 227, 6
+  size: 8, 9
+  orig: 8, 9
+  offset: 0, 0
+  index: -1
 gui/panning
   rotate: false
   xy: 355, 16

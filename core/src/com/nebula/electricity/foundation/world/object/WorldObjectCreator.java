@@ -61,21 +61,20 @@ public class WorldObjectCreator<T extends WorldObject> {
         String type;
         Supplier<T> builder;
 
-        boolean isTicking;
         Vector2i size;
         Function<WorldObjectProperties, WorldObjectProperties> propertiesBuilder;
-        Consumer<T> onObjectCreated;
-        Consumer<T> loadTextures;
+        Consumer<? super T> onObjectCreated;
+        Consumer<? super T> loadTextures;
         boolean areTexturesDefined;
 
         private Factory (String type, Supplier<T> builder) {
             this.type = type;
             this.builder = builder;
 
-            isTicking = false;
             propertiesBuilder = $ -> $;
             onObjectCreated = $ -> {};
             loadTextures = $ -> {};
+
             areTexturesDefined = false;
             size = Vector2i.INVALID;
         }
@@ -85,7 +84,7 @@ public class WorldObjectCreator<T extends WorldObject> {
             return withTextures(object -> ((SimpleObject) object).texture = ElectricitySimulator.getObjectTexture(name));
         }
 
-        public Factory<T> withTextures (Consumer<T> textureLoader) {
+        public Factory<T> withTextures (Consumer<? super T> textureLoader) {
             loadTextures = textureLoader;
             areTexturesDefined = true;
             return this;
@@ -102,12 +101,6 @@ public class WorldObjectCreator<T extends WorldObject> {
             return this;
         }
 
-        // Set whether the object ticks or not
-        public Factory<T> isTicking () {
-            isTicking = true;
-            return this;
-        }
-
         // Assign properties to the object
         public Factory<T> withProperties (Function<WorldObjectProperties, WorldObjectProperties> func) {
             propertiesBuilder = func;
@@ -117,7 +110,7 @@ public class WorldObjectCreator<T extends WorldObject> {
         // Do any other fiddling with the object when its created
         // Can include posting any object-creation events
         // /!\ IMPORTANT - OBJECT'S TEXTURE IS NOT AVAILABLE DURING THIS TIME.
-        public Factory<T> onCreation (Consumer<T> cons) {
+        public Factory<T> onCreation (Consumer<? super T> cons) {
             onObjectCreated = cons;
             return this;
         }
@@ -136,7 +129,6 @@ public class WorldObjectCreator<T extends WorldObject> {
                 T object = builder.get();
 
                 object.type = type;
-                object.isTicking = isTicking;
                 object.position = at;
                 object.size = size;
                 object.properties = propertiesBuilder.apply(object.initProperties());

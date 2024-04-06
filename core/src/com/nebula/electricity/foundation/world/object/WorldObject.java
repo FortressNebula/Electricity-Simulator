@@ -3,7 +3,10 @@ package com.nebula.electricity.foundation.world.object;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.nebula.electricity.foundation.Constants;
+import com.nebula.electricity.foundation.electricity.ElectricObjectHandler;
 import com.nebula.electricity.math.Vector2i;
+
+import java.util.Optional;
 
 public abstract class WorldObject {
     // Visual information
@@ -11,11 +14,27 @@ public abstract class WorldObject {
     protected Vector2i size;
     // Behavioural information
     protected WorldObjectProperties properties;
-    protected boolean isTicking;
+    protected ElectricObjectHandler electricHandler;
     protected String type;
 
     // Behavioural methods
     public void onClick (boolean left) {}
+
+    // Override for electric objects
+    // Called when object is added to the list of world objects
+    public ElectricObjectHandler makeElectricHandler () {
+        return null;
+    }
+
+    public boolean isElectric () { return electricHandler != null; }
+
+    public Optional<ElectricObjectHandler> getElectricHandler () {
+        return Optional.ofNullable(electricHandler);
+    }
+
+    public void setElectricHandler (ElectricObjectHandler handler) {
+        electricHandler = handler;
+    }
 
     // Graphics methods
     public void draw (SpriteBatch batch) {

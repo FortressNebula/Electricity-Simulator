@@ -1,6 +1,5 @@
 package com.nebula.electricity.foundation.world;
 
-import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
@@ -24,8 +23,7 @@ public class WorldRenderer implements Disposable {
         darkWall = ElectricitySimulator.getTexture("background/dark_wall");
     }
 
-    public void draw (SpriteBatch batch, Camera camera, int width, int height, Array<WorldObject> objects) {
-        batch.setProjectionMatrix(camera.combined);
+    public void draw (SpriteBatch batch, int width, int height, Array<WorldObject> objects) {
         batch.setColor(Color.WHITE);
         // Draw tiles
         for (int y = width - 1; y >= 0; y--) {
