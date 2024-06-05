@@ -35,11 +35,11 @@ public class WorldObjectCreator<T extends WorldObject> {
     // Get object type
 
     // Factory
-    public static Factory<SimpleObject> create (String name) {
-        return new Factory<>(name, SimpleObject::new);
+    public static Builder<SimpleObject> create (String name) {
+        return new Builder<>(name, SimpleObject::new);
     }
-    public static <T extends WorldObject> Factory<T> create (String name, Supplier<T> builder) {
-        return new Factory<>(name, builder);
+    public static <T extends WorldObject> Builder<T> create (String name, Supplier<T> builder) {
+        return new Builder<>(name, builder);
     }
 
     // Interacting with all registered world object creators
@@ -57,7 +57,7 @@ public class WorldObjectCreator<T extends WorldObject> {
         throw new IllegalStateException("Unidentified (not-Flying) Object detected");
     }
 
-    public static class Factory<T extends WorldObject> {
+    public static class Builder<T extends WorldObject> {
         String type;
         Supplier<T> builder;
 
@@ -67,7 +67,7 @@ public class WorldObjectCreator<T extends WorldObject> {
         Consumer<? super T> loadTextures;
         boolean areTexturesDefined;
 
-        private Factory (String type, Supplier<T> builder) {
+        private Builder (String type, Supplier<T> builder) {
             this.type = type;
             this.builder = builder;
 
@@ -80,29 +80,29 @@ public class WorldObjectCreator<T extends WorldObject> {
         }
 
         // Attach a texture to the object
-        public Factory<T> withTexture (String name) {
+        public Builder<T> withTexture (String name) {
             return withTextures(object -> ((SimpleObject) object).texture = ElectricitySimulator.getObjectTexture(name));
         }
 
-        public Factory<T> withTextures (Consumer<? super T> textureLoader) {
+        public Builder<T> withTextures (Consumer<? super T> textureLoader) {
             loadTextures = textureLoader;
             areTexturesDefined = true;
             return this;
         }
 
         // Assign a size to the object
-        public Factory<T> withSize (int x, int y) {
+        public Builder<T> withSize (int x, int y) {
             size = new Vector2i(x, y);
             return this;
         }
 
-        public Factory<T> oneByOne () {
+        public Builder<T> oneByOne () {
             size = Vector2i.ONE_BY_ONE;
             return this;
         }
 
         // Assign properties to the object
-        public Factory<T> withProperties (Function<WorldObjectProperties, WorldObjectProperties> func) {
+        public Builder<T> withProperties (Function<WorldObjectProperties, WorldObjectProperties> func) {
             propertiesBuilder = func;
             return this;
         }
@@ -110,7 +110,7 @@ public class WorldObjectCreator<T extends WorldObject> {
         // Do any other fiddling with the object when its created
         // Can include posting any object-creation events
         // /!\ IMPORTANT - OBJECT'S TEXTURE IS NOT AVAILABLE DURING THIS TIME.
-        public Factory<T> onCreation (Consumer<? super T> cons) {
+        public Builder<T> onCreation (Consumer<? super T> cons) {
             onObjectCreated = cons;
             return this;
         }

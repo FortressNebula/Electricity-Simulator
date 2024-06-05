@@ -3,10 +3,7 @@ package com.nebula.electricity.foundation.world.object;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.nebula.electricity.foundation.Constants;
-import com.nebula.electricity.foundation.electricity.ElectricObjectHandler;
 import com.nebula.electricity.math.Vector2i;
-
-import java.util.Optional;
 
 public abstract class WorldObject {
     // Visual information
@@ -14,7 +11,7 @@ public abstract class WorldObject {
     protected Vector2i size;
     // Behavioural information
     protected WorldObjectProperties properties;
-    protected ElectricObjectHandler electricHandler;
+    protected ElectricProperties electricProperties;
     protected String type;
 
     // Behavioural methods
@@ -22,18 +19,16 @@ public abstract class WorldObject {
 
     // Override for electric objects
     // Called when object is added to the list of world objects
-    public ElectricObjectHandler makeElectricHandler () {
+    protected ElectricProperties createElectricProperties () {
         return null;
     }
 
-    public boolean isElectric () { return electricHandler != null; }
-
-    public Optional<ElectricObjectHandler> getElectricHandler () {
-        return Optional.ofNullable(electricHandler);
+    public ElectricProperties getElectricProperties () {
+        return electricProperties;
     }
 
-    public void setElectricHandler (ElectricObjectHandler handler) {
-        electricHandler = handler;
+    public void initElectricProperties () {
+        electricProperties = createElectricProperties();
     }
 
     // Graphics methods

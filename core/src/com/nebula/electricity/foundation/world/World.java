@@ -7,12 +7,11 @@ import com.badlogic.gdx.utils.OrderedMap;
 import com.nebula.electricity.ElectricitySimulator;
 import com.nebula.electricity.foundation.Constants;
 import com.nebula.electricity.foundation.Module;
+import com.nebula.electricity.foundation.electricity.ConnectionReference;
 import com.nebula.electricity.foundation.world.object.WorldObject;
 import com.nebula.electricity.math.Vector2i;
 
-import java.util.Comparator;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Consumer;
 
 /**
@@ -80,7 +79,7 @@ public class World implements Module {
         // Make sure position is valid
         if (!object.withinWorldBounds()) return false;
         if (canPlace(object)) return false;
-        object.setElectricHandler(object.makeElectricHandler());
+        object.initElectricProperties();
         allObjects.put(UUID.randomUUID(), object);
         return true;
     }
@@ -90,10 +89,29 @@ public class World implements Module {
     }
 
     public boolean removeObject (UUID id) {
+        WorldObject object = allObjects.get(id);
+
+        // Remove influence from circuits
+        if (object.getElectricProperties() != null) {
+            List<ConnectionReference> toDelete = new ArrayList<>();
+
+            for (ConnectionReference ref : ElectricitySimulator.CIRCUIT_MANAGER.getAllConnections().keySet()) {
+                if (object.getElectricProperties().containsNode(ref.getID1())
+                || object.getElectricProperties().containsNode(ref.getID2()))
+                    toDelete.add(ref);
+            }
+
+            for (ConnectionReference ref : toDelete)
+                ElectricitySimulator.CIRCUIT_MANAGER.getAllConnections().remove(ref);
+        }
+
         return allObjects.remove(id) != null;
     }
 
-    public void clearObjects () { allObjects.clear(); }
+    public void clearObjects () {
+        allObjects.clear();
+        ElectricitySimulator.CIRCUIT_MANAGER.clearConnections();
+    }
 
     public Optional<UUID> objectAt (Vector2i pos) {
         if (!pos.withinBounds(Constants.LIMITS.x, Constants.LIMITS.y))

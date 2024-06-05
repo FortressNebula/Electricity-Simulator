@@ -46,6 +46,13 @@ gui/bg_corner
   orig: 24, 24
   offset: 0, 0
   index: -1
+gui/closed_connection
+  rotate: false
+  xy: 227, 6
+  size: 8, 9
+  orig: 8, 9
+  offset: 0, 0
+  index: -1
 gui/default
   rotate: false
   xy: 337, 16
@@ -62,7 +69,7 @@ gui/hover_overlay
   index: -1
 gui/open_connection
   rotate: false
-  xy: 227, 6
+  xy: 337, 5
   size: 8, 9
   orig: 8, 9
   offset: 0, 0

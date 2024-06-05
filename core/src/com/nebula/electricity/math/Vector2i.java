@@ -38,6 +38,10 @@ public class Vector2i {
         return withinBounds(0, 0, maxX, maxY);
     }
 
+    public boolean withinBounds (Vector2i min, Vector2i max) {
+        return withinBounds(min.x, min.y, max.x, max.y);
+    }
+
     public boolean isValid () { return x >= 0 && y >= 0; }
 
     // Math methods

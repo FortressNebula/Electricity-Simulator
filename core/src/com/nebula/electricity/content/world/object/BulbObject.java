@@ -3,8 +3,10 @@ package com.nebula.electricity.content.world.object;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.nebula.electricity.ElectricitySimulator;
+import com.nebula.electricity.foundation.world.object.ElectricProperties;
 import com.nebula.electricity.foundation.world.object.SimpleObject;
 import com.nebula.electricity.foundation.world.object.WorldObjectProperties;
+import com.nebula.electricity.math.Direction;
 import com.nebula.electricity.math.Vector2i;
 
 import java.util.function.Consumer;
@@ -17,6 +19,17 @@ public class BulbObject extends SimpleObject {
     protected WorldObjectProperties initProperties () {
         return super.initProperties()
                 .add("on", false);
+    }
+
+    @Override
+    public ElectricProperties createElectricProperties () {
+        return ElectricProperties.make()
+                .resistance(6f)
+                .addNode(0, 0, Direction.LEFT)
+                .addNode(0, 0, Direction.UP)
+                .addNode(0, 0, Direction.RIGHT)
+                .addNode(0, 0, Direction.DOWN)
+                .buildAt(position, getSize(), Direction.LEFT);
     }
 
     @Override

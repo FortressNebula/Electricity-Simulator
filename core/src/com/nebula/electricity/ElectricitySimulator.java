@@ -6,11 +6,14 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.nebula.electricity.content.world.AllWorldObjects;
 import com.nebula.electricity.foundation.Module;
+import com.nebula.electricity.foundation.electricity.CircuitManager;
 import com.nebula.electricity.foundation.events.Events;
 import com.nebula.electricity.foundation.input.InputManager;
 import com.nebula.electricity.foundation.world.World;
@@ -30,11 +33,13 @@ public class ElectricitySimulator extends ApplicationAdapter {
 
 	public static final World WORLD = add(new World());
 	public static final InputManager INPUT_MANAGER = add(new InputManager());
+	public static final CircuitManager CIRCUIT_MANAGER = add(new CircuitManager());
 
 	// Rendering information
 	private static final Color BACKGROUND_COLOUR = Color.valueOf("5e6385");
 	private static TextureAtlas atlas;
 	private static SpriteBatch batch;
+	private static ShapeRenderer shapes;
 	private static OrthographicCamera camera;
 	private static OrthographicCamera guiCamera; // READ-ONLY
 	private static boolean isCameraDirty;
@@ -49,6 +54,7 @@ public class ElectricitySimulator extends ApplicationAdapter {
 	public void create () {
 		// Initialise rendering tools
 		batch = new SpriteBatch();
+		shapes = new ShapeRenderer();
 		camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		guiCamera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		guiCamera.translate(Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.5f);
@@ -85,6 +91,14 @@ public class ElectricitySimulator extends ApplicationAdapter {
 			m.draw(batch);
 		batch.end();
 
+		// Draw shapes and primitives
+		shapes.begin(ShapeRenderer.ShapeType.Filled);
+		shapes.setProjectionMatrix(camera.combined);
+		shapes.setColor(1,1,1,1);
+		for (Module m : MODULES)
+			m.drawShapes(shapes);
+		shapes.end();
+
 		// Draw GUI
 		batch.begin();
 		batch.setProjectionMatrix(guiCamera.combined);
@@ -117,6 +131,7 @@ public class ElectricitySimulator extends ApplicationAdapter {
 	public void dispose () {
 		atlas.dispose();
 		batch.dispose();
+		shapes.dispose();
 		for (Module m : MODULES)
 			m.dispose();
 	}
@@ -147,6 +162,14 @@ public class ElectricitySimulator extends ApplicationAdapter {
 
 	public static Vector2i unproject (Vector2i screenPos) {
 		return new Vector2i(camera.unproject(new Vector3(screenPos.x, screenPos.y, 0)));
+	}
+
+	public static Matrix4 getCameraProjection () {
+		return camera.combined;
+	}
+
+	public static Matrix4 getGUIProjection () {
+		return guiCamera.combined;
 	}
 
 	// Atlas utilities
