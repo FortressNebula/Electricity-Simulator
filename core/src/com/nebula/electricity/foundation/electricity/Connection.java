@@ -6,20 +6,22 @@ public class Connection {
     float voltage;
     float current;
 
+    public boolean isInternal;
     public boolean shouldDraw;
 
-    public Connection (float voltage, float current, float resistance, boolean shouldDraw) {
+    public Connection (float voltage, float current, float resistance, boolean shouldDraw, boolean isInternal) {
         this.voltage = voltage;
         this.resistance = resistance;
         this.current = current;
         this.shouldDraw = shouldDraw;
+        this.isInternal = isInternal;
     }
 
-    public Connection (float voltage, float resistance, boolean shouldDraw) {
-        this(voltage, 0, resistance, shouldDraw);
+    public static Connection internal (float voltage, float resistance) {
+        return new Connection(voltage, 0, resistance, false, true);
     }
 
-    public Connection (float voltage, float resistance) {
-        this(voltage, 0, resistance, true);
+    public static Connection external () {
+        return new Connection(0,0,0, true, false);
     }
 }

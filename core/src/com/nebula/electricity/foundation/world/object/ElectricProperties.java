@@ -64,31 +64,28 @@ public class ElectricProperties {
     public void recheckConnected () {
         nodes.forEach(n -> n.setConnected(false));
 
-        for (ConnectionReference ref : ElectricitySimulator.CIRCUIT_MANAGER.getAllConnections().keySet()) {
+        for (ConnectionReference ref : ElectricitySimulator.CIRCUIT_MANAGER.getAllConnections()) {
             // Discard internal connections
-            if (!ElectricitySimulator.CIRCUIT_MANAGER.getConnection(ref).shouldDraw)
+            if (ElectricitySimulator.CIRCUIT_MANAGER.getConnection(ref).isInternal)
                 continue;
             // Ignore connections that don't concern us
             if (!containsNode(ref.getID1()) && !containsNode(ref.getID2()))
                 continue;
 
-            nodes.forEach(n -> {
-                if (n.getID() == ref.getID1() || n.getID() == ref.getID2())
-                    n.setConnected(true);
-            });
+            nodes.forEach(n -> n.setConnected(n.getConnected() || ref.containsNode(n.getID())));
         }
 
         if (nodes.stream().mapToInt(n -> n.getConnected() ? 1 : 0).sum() < 2 && registeredConnectionID != null) {
             // We have lost our internal connection
             nodes.forEach(n -> n.setEnabled(true));
-            ElectricitySimulator.CIRCUIT_MANAGER.removeConnection(registeredConnectionID);
+            ElectricitySimulator.CIRCUIT_MANAGER.deleteConnection(registeredConnectionID);
             registeredConnectionID = null;
         }
     }
 
     // Registers an internal connection
     public void registerInternalConnection (int id1, int id2) {
-        ElectricitySimulator.CIRCUIT_MANAGER.registerConnection(id1, id2, new Connection(voltage, resistance, false));
+        ElectricitySimulator.CIRCUIT_MANAGER.registerConnection(id1, id2, Connection.internal(voltage, resistance));
         registeredConnectionID = ConnectionReference.fromIDs(id1, id2);
     }
 

@@ -4,9 +4,7 @@ import com.nebula.electricity.foundation.Constants;
 import com.nebula.electricity.math.Direction;
 import com.nebula.electricity.math.Vector2i;
 
-public class Node {
-    static int GLOBAL_ID = 0;
-
+public class Node implements CircuitVertex {
     Vector2i position;
     Direction direction;
     boolean isConnected;
@@ -22,7 +20,7 @@ public class Node {
         this.direction = direction;
         isConnected = false;
         isEnabled = true;
-        id = GLOBAL_ID++;
+        id = CircuitManager.GLOBAL_VERTEX_ID++;
     }
 
     public Node moveTo (Vector2i newPosition) {
@@ -36,11 +34,17 @@ public class Node {
         return this;
     }
 
+    @Override
     public Vector2i getRenderPosition () {
         return position
                 .mul(Constants.SCALED_TILE_SIZE)
                 .add(getDirectionalOffset())
-                .add(new Vector2i(-20, 20));
+                .add(-20, 20);
+    }
+
+    @Override
+    public boolean canConnect () {
+        return isEnabled && !isConnected;
     }
 
     public Vector2i getDirectionalOffset () {
@@ -58,5 +62,6 @@ public class Node {
     public void setEnabled(boolean value) { isEnabled = value; }
     public void setConnected(boolean value) { isConnected = value; }
 
+    @Override
     public int getID () { return id; }
 }

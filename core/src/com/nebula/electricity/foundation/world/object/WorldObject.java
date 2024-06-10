@@ -13,6 +13,7 @@ public abstract class WorldObject {
     protected WorldObjectProperties properties;
     protected ElectricProperties electricProperties;
     protected String type;
+    private boolean isElectric = true;
 
     // Behavioural methods
     public void onClick (boolean left) {}
@@ -20,12 +21,15 @@ public abstract class WorldObject {
     // Override for electric objects
     // Called when object is added to the list of world objects
     protected ElectricProperties createElectricProperties () {
+        isElectric = false; // When overridden, don't call super! so this line isn't called.
         return null;
     }
 
     public ElectricProperties getElectricProperties () {
         return electricProperties;
     }
+
+    public boolean isElectric () { return isElectric; }
 
     public void initElectricProperties () {
         electricProperties = createElectricProperties();

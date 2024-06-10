@@ -56,6 +56,7 @@ public class Vector2i {
 
     public Vector2i add (Vector2i v) { return new Vector2i(x + v.x, y + v.y); }
     public Vector2i add (int s) { return new Vector2i(x + s, y + s); }
+    public Vector2i add (int dx, int dy) { return new Vector2i(x + dx, y + dy); }
 
     @Override
     public String toString () {

@@ -75,11 +75,23 @@ public class World implements Module {
         allObjects.forEach(entry -> func.accept(entry.value));
     }
 
+    public void forEachElectricalObject (Consumer<WorldObject> func) {
+        allObjects.forEach(entry -> {
+            if (entry.value.isElectric())
+                func.accept(entry.value);
+        });
+    }
+
     public <T extends WorldObject> boolean addObject (T object) {
         // Make sure position is valid
         if (!object.withinWorldBounds()) return false;
         if (canPlace(object)) return false;
+
+        // Electrical
         object.initElectricProperties();
+        if (object.isElectric())
+            ElectricitySimulator.CIRCUIT_MANAGER.registerVerticies(object.getElectricProperties().getNodes());
+
         allObjects.put(UUID.randomUUID(), object);
         return true;
     }
@@ -92,17 +104,16 @@ public class World implements Module {
         WorldObject object = allObjects.get(id);
 
         // Remove influence from circuits
-        if (object.getElectricProperties() != null) {
-            List<ConnectionReference> toDelete = new ArrayList<>();
+        if (object.isElectric()) {
+            ElectricitySimulator.CIRCUIT_MANAGER.deleteVertices(object.getElectricProperties().getNodes());
 
-            for (ConnectionReference ref : ElectricitySimulator.CIRCUIT_MANAGER.getAllConnections().keySet()) {
+            for (ConnectionReference ref : ElectricitySimulator.CIRCUIT_MANAGER.getAllConnections()) {
                 if (object.getElectricProperties().containsNode(ref.getID1())
                 || object.getElectricProperties().containsNode(ref.getID2()))
-                    toDelete.add(ref);
+                    ElectricitySimulator.CIRCUIT_MANAGER.queueDeleteConnection(ref);
             }
 
-            for (ConnectionReference ref : toDelete)
-                ElectricitySimulator.CIRCUIT_MANAGER.getAllConnections().remove(ref);
+            ElectricitySimulator.CIRCUIT_MANAGER.flushDeletionQueue();
         }
 
         return allObjects.remove(id) != null;
