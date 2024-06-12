@@ -1,6 +1,7 @@
-package com.nebula.electricity.foundation.electricity;
+package com.nebula.electricity.foundation.electricity.component;
 
 import com.nebula.electricity.foundation.Constants;
+import com.nebula.electricity.foundation.electricity.CircuitManager;
 import com.nebula.electricity.math.Vector2i;
 
 public class Junction implements CircuitVertex {

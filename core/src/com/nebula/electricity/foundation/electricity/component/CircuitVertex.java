@@ -1,4 +1,4 @@
-package com.nebula.electricity.foundation.electricity;
+package com.nebula.electricity.foundation.electricity.component;
 
 import com.nebula.electricity.math.Vector2i;
 

@@ -1,9 +1,8 @@
 package com.nebula.electricity.foundation.world.object;
 
-import com.nebula.electricity.ElectricitySimulator;
-import com.nebula.electricity.foundation.electricity.Connection;
-import com.nebula.electricity.foundation.electricity.ConnectionReference;
-import com.nebula.electricity.foundation.electricity.Node;
+import com.nebula.electricity.foundation.electricity.component.Connection;
+import com.nebula.electricity.foundation.electricity.component.ConnectionReference;
+import com.nebula.electricity.foundation.electricity.component.Node;
 import com.nebula.electricity.math.Direction;
 import com.nebula.electricity.math.Vector2i;
 
@@ -11,6 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static com.nebula.electricity.ElectricitySimulator.CIRCUIT_MANAGER;
 
 public class ElectricProperties {
     // Terminals
@@ -20,8 +21,6 @@ public class ElectricProperties {
     // Electrical information
     float resistance;
     float voltage;
-    // Update information
-    boolean isDirty;
 
     protected ElectricProperties (List<Node> nodes, float voltage, float resistance) {
         this.nodes = nodes;
@@ -31,20 +30,13 @@ public class ElectricProperties {
         this.registeredConnectionID = null;
         this.voltage = voltage;
         this.resistance = resistance;
-
-        isDirty = false;
     }
 
     public List<Node> getNodes () { return nodes; }
 
     public boolean containsNode (int id) { return ids.contains(id); }
 
-    public void markDirty () { isDirty = true; }
-
     public void update () {
-        if (!isDirty)
-            return;
-
         // Count number of connected nodes
         List<Node> connected = nodes.stream()
                 .filter(Node::getConnected)
@@ -64,9 +56,9 @@ public class ElectricProperties {
     public void recheckConnected () {
         nodes.forEach(n -> n.setConnected(false));
 
-        for (ConnectionReference ref : ElectricitySimulator.CIRCUIT_MANAGER.getAllConnections()) {
+        for (ConnectionReference ref : CIRCUIT_MANAGER.CONNECTIONS.getAllIDs()) {
             // Discard internal connections
-            if (ElectricitySimulator.CIRCUIT_MANAGER.getConnection(ref).isInternal)
+            if (CIRCUIT_MANAGER.CONNECTIONS.get(ref).isInternal)
                 continue;
             // Ignore connections that don't concern us
             if (!containsNode(ref.getID1()) && !containsNode(ref.getID2()))
@@ -78,15 +70,15 @@ public class ElectricProperties {
         if (nodes.stream().mapToInt(n -> n.getConnected() ? 1 : 0).sum() < 2 && registeredConnectionID != null) {
             // We have lost our internal connection
             nodes.forEach(n -> n.setEnabled(true));
-            ElectricitySimulator.CIRCUIT_MANAGER.deleteConnection(registeredConnectionID);
+            CIRCUIT_MANAGER.CONNECTIONS.delete(registeredConnectionID);
             registeredConnectionID = null;
         }
     }
 
     // Registers an internal connection
     public void registerInternalConnection (int id1, int id2) {
-        ElectricitySimulator.CIRCUIT_MANAGER.registerConnection(id1, id2, Connection.internal(voltage, resistance));
-        registeredConnectionID = ConnectionReference.fromIDs(id1, id2);
+        CIRCUIT_MANAGER.CONNECTIONS.add(ConnectionReference.of(id1, id2), Connection.internal(voltage, resistance));
+        registeredConnectionID = ConnectionReference.of(id1, id2);
     }
 
     // Registers an internal connection and disables all the other nodes

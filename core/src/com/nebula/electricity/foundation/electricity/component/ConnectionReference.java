@@ -1,4 +1,4 @@
-package com.nebula.electricity.foundation.electricity;
+package com.nebula.electricity.foundation.electricity.component;
 
 import java.util.Objects;
 
@@ -11,8 +11,12 @@ public class ConnectionReference {
         this.id2 = id2;
     }
 
-    public static ConnectionReference fromIDs (int i, int j) {
+    public static ConnectionReference of (int i, int j) {
         return new ConnectionReference(i, j);
+    }
+
+    public static ConnectionReference of (CircuitVertex i, CircuitVertex j) {
+        return new ConnectionReference(i.getID(), j.getID());
     }
 
     public boolean containsNode (int id) {

@@ -1,4 +1,4 @@
-package com.nebula.electricity.foundation.electricity;
+package com.nebula.electricity.foundation.electricity.component;
 
 public class Connection {
     // Electrical information
