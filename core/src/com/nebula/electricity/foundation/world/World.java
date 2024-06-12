@@ -1,6 +1,7 @@
 package com.nebula.electricity.foundation.world;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.badlogic.gdx.utils.OrderedMap;
@@ -22,9 +23,7 @@ import static com.nebula.electricity.ElectricitySimulator.CIRCUIT_MANAGER;
  */
 public class World implements Module {
     // Associated renderer
-    private WorldRenderer renderer;
-    // Map information
-    private int width, height;
+    public WorldRenderer renderer;
     // Objects
     private OrderedMap<UUID, WorldObject> allObjects;
     // DEBUG
@@ -41,10 +40,6 @@ public class World implements Module {
         // Create renderer
         renderer = new WorldRenderer();
 
-        // Populate map with tiles
-        this.width = Constants.WORLD_SIZE.x;
-        this.height = Constants.WORLD_SIZE.y;
-
         // Initialise object map
         allObjects = new OrderedMap<>();
 
@@ -53,16 +48,16 @@ public class World implements Module {
 
         // Centre camera position
         ElectricitySimulator.getCamera().translate(
-                Constants.SCALED_TILE_SIZE.x * width * 0.5f,
-                Constants.SCALED_TILE_SIZE.y * height * 0.5f
+                Constants.SCALED_TILE_SIZE.x * Constants.WORLD_SIZE.x * 0.5f,
+                Constants.SCALED_TILE_SIZE.y * Constants.WORLD_SIZE.y * 0.5f
         );
     }
 
     @Override
-    public void draw (SpriteBatch batch) {
+    public void draw (SpriteBatch batch, ShapeRenderer shapes) {
         Array<WorldObject> objects = allObjects.values().toArray();
         objects.sort(Comparator.comparingInt(a -> -a.getPos().y));
-        renderer.draw(batch, width, height, objects);
+        renderer.draw(batch, objects);
     }
 
     @Override

@@ -31,9 +31,9 @@ public class ElectricitySimulator extends ApplicationAdapter {
 	// All modules
 	public static Module[] MODULES = new Module[]{};
 
+	public static final CircuitManager CIRCUIT_MANAGER = add(new CircuitManager());
 	public static final World WORLD = add(new World());
 	public static final InputManager INPUT_MANAGER = add(new InputManager());
-	public static final CircuitManager CIRCUIT_MANAGER = add(new CircuitManager());
 
 	// Rendering information
 	private static final Color BACKGROUND_COLOUR = Color.valueOf("5e6385");
@@ -43,6 +43,8 @@ public class ElectricitySimulator extends ApplicationAdapter {
 	private static OrthographicCamera camera;
 	private static OrthographicCamera guiCamera; // READ-ONLY
 	private static boolean isCameraDirty;
+	private static boolean isUsingSpriteBatch;
+	private static boolean isUsingGUICamera;
 
 	// General utilities
 	public static final Random RANDOM = new Random();
@@ -59,6 +61,10 @@ public class ElectricitySimulator extends ApplicationAdapter {
 		guiCamera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		guiCamera.translate(Gdx.graphics.getWidth() * 0.5f, Gdx.graphics.getHeight() * 0.5f);
 		atlas = new TextureAtlas("atlases/main.atlas");
+
+		isUsingSpriteBatch = true;
+		isUsingGUICamera = false;
+
 		// Init all the modules
 		for (Module m : MODULES)
 			m.init();
@@ -85,27 +91,22 @@ public class ElectricitySimulator extends ApplicationAdapter {
 
 		// Draw all modules
 		ScreenUtils.clear(BACKGROUND_COLOUR);
-		batch.begin();
-		batch.setProjectionMatrix(camera.combined);
-		for (Module m : MODULES)
-			m.draw(batch);
-		batch.end();
 
-		// Draw shapes and primitives
-		shapes.begin(ShapeRenderer.ShapeType.Filled);
-		shapes.setProjectionMatrix(camera.combined);
-		shapes.setColor(1,1,1,1);
+		setRenderModeAndStart(true, false);
+		batch.begin();
+		batch.setColor(1,1,1,1);
+		ElectricitySimulator.WORLD.renderer.drawGround(batch);
 		for (Module m : MODULES)
-			m.drawShapes(shapes);
-		shapes.end();
+			m.draw(batch, shapes);
 
 		// Draw GUI
-		batch.begin();
-		batch.setProjectionMatrix(guiCamera.combined);
+		setRenderModeAndStart(true,true);
 		batch.setColor(1,1,1,1);
 		for (Module m : MODULES)
-			m.drawGUI(batch);
-		batch.end();
+			m.drawGUI(batch, shapes);
+
+		if (batch.isDrawing()) batch.end();
+		if (shapes.isDrawing()) shapes.end();
 	}
 
 	/**
@@ -135,6 +136,38 @@ public class ElectricitySimulator extends ApplicationAdapter {
 		for (Module m : MODULES)
 			m.dispose();
 	}
+
+	// Render utilities
+	public static void setRenderModeAndStart (boolean shouldUseBatch, boolean shouldUseGUICamera) {
+		if (shouldUseBatch != isUsingSpriteBatch) {
+			// Switching from sprite batch to geometry, or otherwise
+			if (isUsingSpriteBatch) {
+				if (batch.isDrawing()) batch.end();
+				shapes.begin(ShapeRenderer.ShapeType.Filled);
+				shapes.setProjectionMatrix(shouldUseGUICamera ? guiCamera.combined : camera.combined);
+			} else {
+				if (shapes.isDrawing()) shapes.end();
+				batch.begin();
+				batch.setProjectionMatrix(shouldUseGUICamera ? guiCamera.combined : camera.combined);
+			}
+		} else {
+			if (shouldUseGUICamera == isUsingGUICamera)
+				return;
+
+			// Only changing projection matrix
+			if (isUsingSpriteBatch)
+				batch.setProjectionMatrix(shouldUseGUICamera ? guiCamera.combined : camera.combined);
+			else
+				shapes.setProjectionMatrix(shouldUseGUICamera ? guiCamera.combined : camera.combined);
+
+		}
+
+		isUsingSpriteBatch = shouldUseBatch;
+		isUsingGUICamera = shouldUseGUICamera;
+	}
+
+	public boolean inSpriteMode () { return isUsingSpriteBatch; }
+	public boolean inGUIMode () { return isUsingGUICamera; }
 
 	// Module utilities
 	private static <T extends Module> T add (T module) {

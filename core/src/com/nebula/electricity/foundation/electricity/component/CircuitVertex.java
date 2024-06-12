@@ -5,5 +5,6 @@ import com.nebula.electricity.math.Vector2i;
 public interface CircuitVertex {
     int getID ();
     Vector2i getRenderPosition ();
+    Vector2i getCombinedPosition ();
     boolean canConnect ();
 }

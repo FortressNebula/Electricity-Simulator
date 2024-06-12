@@ -7,9 +7,8 @@ import com.badlogic.gdx.utils.Disposable;
 public interface Module extends Disposable {
     void init ();
 
-    default void draw (SpriteBatch batch) {}
-    default void drawGUI (SpriteBatch batch) {}
-    default void drawShapes (ShapeRenderer shapes) {}
+    default void draw (SpriteBatch batch, ShapeRenderer shapes) {}
+    default void drawGUI (SpriteBatch batch, ShapeRenderer shapes) {}
     default void update () {}
     default void dispose () {}
 }

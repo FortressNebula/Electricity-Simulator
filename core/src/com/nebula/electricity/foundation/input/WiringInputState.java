@@ -84,8 +84,9 @@ public class WiringInputState extends InputState {
     }
 
     @Override
-    public void drawGUI (SpriteBatch batch) {
-        batch.setProjectionMatrix(ElectricitySimulator.getCameraProjection());
+    public void drawGUI (SpriteBatch batch, ShapeRenderer shapes) {
+        ElectricitySimulator.setRenderModeAndStart(true, false);
+
         // Draw nodes
         for (Node node : CIRCUIT_MANAGER.VERTICES.getSubset(Node.class)) {
             Vector2i drawPos = node.getRenderPosition();
@@ -102,16 +103,17 @@ public class WiringInputState extends InputState {
             batch.draw(junction.getID() == connectingID ? selectedJunctionConnection : junctionConnection,
                     drawPos.x, drawPos.y, Constants.SCALE * 8, Constants.SCALE * 9);
         }
-        batch.setProjectionMatrix(ElectricitySimulator.getGUIProjection());
     }
 
     @Override
-    public void drawShapes (ShapeRenderer shapes) {
+    public void draw (SpriteBatch batch, ShapeRenderer shapes) {
+        ElectricitySimulator.setRenderModeAndStart(false, false);
+
         // Draw connections
         shapes.setColor(0.5f,1f,0.2f,1);
         for (ConnectionReference ref : CIRCUIT_MANAGER.CONNECTIONS.getAllIDs()) {
-            //if (!CIRCUIT_MANAGER.getConnection(ref).shouldDraw)
-            //    continue;
+            if (!CIRCUIT_MANAGER.CONNECTIONS.get(ref).shouldDraw)
+                continue;
 
             Vector2i startPos = CIRCUIT_MANAGER.VERTICES.get(ref.getID1()).getRenderPosition().add(20);
             Vector2i endPos   = CIRCUIT_MANAGER.VERTICES.get(ref.getID2()).getRenderPosition().add(20);

@@ -23,11 +23,10 @@ public class WorldRenderer implements Disposable {
         darkWall = ElectricitySimulator.getTexture("background/dark_wall");
     }
 
-    public void draw (SpriteBatch batch, int width, int height, Array<WorldObject> objects) {
-        batch.setColor(Color.WHITE);
+    public void drawGround (SpriteBatch batch) {
         // Draw tiles
-        for (int y = width - 1; y >= 0; y--) {
-            for (int x = 0; x < height; x++) {
+        for (int y = Constants.WORLD_SIZE.y - 1; y >= 0; y--) {
+            for (int x = 0; x < Constants.WORLD_SIZE.x; x++) {
                 batch.draw((x + y) % 2 == 0 ? light : dark, x * Constants.SCALED_TILE_SIZE.x, y * Constants.SCALED_TILE_SIZE.y,
                         Constants.SCALED_TILE_SIZE.x, Constants.SCALED_TILE_SIZE.y);
 
@@ -38,6 +37,13 @@ public class WorldRenderer implements Disposable {
                         Constants.SCALED_TILE_SIZE.x, 8 * Constants.SCALE);
             }
         }
+    }
+
+    public void draw (SpriteBatch batch, Array<WorldObject> objects) {
+        ElectricitySimulator.setRenderModeAndStart(true, false);
+
+        batch.setColor(Color.WHITE);
+
         for (WorldObject object : objects) object.draw(batch);
     }
 

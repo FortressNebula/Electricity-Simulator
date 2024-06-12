@@ -28,6 +28,16 @@ public class Vector2i {
         this.y = MathUtils.floor(y);
     }
 
+    public static Vector2i fromDirection (Direction dir) {
+        switch (dir) {
+            case DOWN: return new Vector2i( 0,-1);
+            case UP:   return new Vector2i( 0, 1);
+            case LEFT: return new Vector2i(-1, 0);
+            case RIGHT:return new Vector2i( 1, 0);
+        }
+        throw new IllegalStateException("what");
+    }
+
     public boolean withinBounds (int minX, int minY, int maxX, int maxY) {
         if (x < minX || x > maxX) return false;
         if (y < minY || y > maxY) return false;

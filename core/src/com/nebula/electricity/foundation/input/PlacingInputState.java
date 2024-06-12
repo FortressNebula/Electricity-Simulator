@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Cursor;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.nebula.electricity.ElectricitySimulator;
 import com.nebula.electricity.foundation.Constants;
 import com.nebula.electricity.foundation.world.object.WorldObject;
@@ -37,7 +38,9 @@ public class PlacingInputState extends InputState {
     }
 
     @Override
-    public void draw (SpriteBatch batch) {
+    public void draw (SpriteBatch batch, ShapeRenderer shapes) {
+        ElectricitySimulator.setRenderModeAndStart(true, false);
+
         batch.setColor(isValid ? 0.1f : 1, isValid ? 1 : 0.1f, 0.2f, alpha / 2);
         currentObject.drawGhost(batch);
         batch.setColor(1, 1, 1, 1);

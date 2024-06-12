@@ -22,7 +22,13 @@ public class Junction implements CircuitVertex {
     public Vector2i getRenderPosition () {
         return position
                 .mul(Constants.SCALED_TILE_SIZE)
-                .add(12 * Constants.SCALE, 9 * Constants.SCALE);
+                .add(Constants.SCALED_TILE_SIZE.x / 2, Constants.SCALED_TILE_SIZE.y / 2)
+                .add(-20, 20);
+    }
+
+    @Override
+    public Vector2i getCombinedPosition () {
+        return getRenderPosition();
     }
 
     public Vector2i getPosition () { return position; }

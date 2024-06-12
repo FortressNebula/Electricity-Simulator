@@ -38,17 +38,14 @@ public class InputManager extends InputAdapter implements Module {
     }
 
     @Override
-    public void draw (SpriteBatch batch) {
-        state.draw(batch);
+    public void draw (SpriteBatch batch, ShapeRenderer shapes) {
+        state.draw(batch, shapes);
     }
 
     @Override
-    public void drawShapes (ShapeRenderer shapes) {
-        state.drawShapes(shapes);
-    }
+    public void drawGUI (SpriteBatch batch, ShapeRenderer shapes) {
+        ElectricitySimulator.setRenderModeAndStart(true, true);
 
-    @Override
-    public void drawGUI (SpriteBatch batch) {
         // Draw the GUI
         // Background
         batch.draw(guiBackground, Gdx.graphics.getWidth() - InputStates.values().length*120, 0,
@@ -78,7 +75,7 @@ public class InputManager extends InputAdapter implements Module {
             }
         }
 
-        state.drawGUI(batch);
+        state.drawGUI(batch, shapes);
     }
 
     @Override
@@ -142,6 +139,10 @@ public class InputManager extends InputAdapter implements Module {
     public boolean scrolled (float amountX, float amountY) {
         state.mouseScrolled(amountY);
         return false;
+    }
+
+    public boolean inWiringMode () {
+        return selectedState == InputStates.WIRING;
     }
 
     public enum InputStates {
