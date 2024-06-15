@@ -1,36 +1,44 @@
 package com.nebula.electricity.foundation.electricity;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class ComponentManager<A, B> {
+public abstract class Registry<A, B> {
     final HashMap<A, B> all;
     final List<A> toDelete;
-    private Function<B, A> idFunction;
 
-    public ComponentManager () {
+    public Registry () {
         all = new HashMap<>();
         toDelete = new ArrayList<>();
-        idFunction = $ -> { throw new IllegalStateException("Cannot get ID!"); };
     }
 
-    public void addIDFunction (Function<B, A> idFunction) {
-        this.idFunction = idFunction;
+    abstract A makeID (B component);
+    void onAdded (A id) {}
+    void onDeleted (A id) {}
+    void onClear () {}
+
+    public void add (A id, B component) {
+        all.put(id, component);
+        onAdded(id);
     }
 
-    public void add (A id, B component) { all.put(id, component); }
+    public void add (B component) {
+        add(makeID(component), component);
+    }
 
-    public void add (B component) { all.put(idFunction.apply(component), component); }
     public void add (List<? extends B> components) {
         for (B component : components)
-            all.put(idFunction.apply(component), component);
+            add(makeID(component), component);
     }
 
-    public void delete (A id) { all.remove(id); }
+    public void delete (A id) {
+        all.remove(id);
+        onDeleted(id);
+    }
     public void delete (List<? extends B> components) {
-        for (B component : components)
-            all.remove(idFunction.apply(component));
+        for (B component : components) {
+            delete(makeID(component));
+        }
     }
 
     public void queueDelete (A id) {
@@ -39,12 +47,13 @@ public class ComponentManager<A, B> {
 
     public void flush () {
         for (A id : toDelete)
-            all.remove(id);
+            delete(id);
         toDelete.clear();
     }
 
     public void clear () {
         all.clear();
+        onClear();
     }
 
     public Collection<B> getAll () {

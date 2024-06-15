@@ -19,8 +19,16 @@ public class ConnectionReference {
         return new ConnectionReference(i.getID(), j.getID());
     }
 
-    public boolean containsNode (int id) {
+    public boolean containsVertex (int id) {
         return id1 == id || id2 == id;
+    }
+
+    public int getOther (int id) {
+        if (id1 == id)
+            return id2;
+        if (id2 == id)
+            return id1;
+        return -1;
     }
 
     public int getID1 () { return id1; }

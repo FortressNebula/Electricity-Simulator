@@ -13,7 +13,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.nebula.electricity.content.world.AllWorldObjects;
 import com.nebula.electricity.foundation.Module;
-import com.nebula.electricity.foundation.electricity.CircuitManager;
+import com.nebula.electricity.foundation.electricity.Electricity;
 import com.nebula.electricity.foundation.events.Events;
 import com.nebula.electricity.foundation.input.InputManager;
 import com.nebula.electricity.foundation.world.World;
@@ -31,7 +31,7 @@ public class ElectricitySimulator extends ApplicationAdapter {
 	// All modules
 	public static Module[] MODULES = new Module[]{};
 
-	public static final CircuitManager CIRCUIT_MANAGER = add(new CircuitManager());
+	public static final Electricity ELECTRICITY = add(new Electricity());
 	public static final World WORLD = add(new World());
 	public static final InputManager INPUT_MANAGER = add(new InputManager());
 

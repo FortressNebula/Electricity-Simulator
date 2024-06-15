@@ -12,6 +12,8 @@ import com.nebula.electricity.math.Vector2i;
 
 import java.util.function.Function;
 
+import static com.nebula.electricity.ElectricitySimulator.ELECTRICITY;
+
 public class InputManager extends InputAdapter implements Module {
     // State-machine
     InputStates hoveringOverState;
@@ -89,6 +91,8 @@ public class InputManager extends InputAdapter implements Module {
         if (hoveringOverState != null) {
             selectedState = hoveringOverState;
             state = selectedState.create(screenX, screenY);
+
+            ELECTRICITY.refreshConnected();
         }
 
         return state.touchDown(new Vector2i(screenX, screenY), pointer, button);

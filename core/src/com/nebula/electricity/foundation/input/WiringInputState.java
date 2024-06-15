@@ -8,12 +8,13 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.nebula.electricity.ElectricitySimulator;
 import com.nebula.electricity.foundation.Constants;
+import com.nebula.electricity.foundation.electricity.circuit.Circuit;
 import com.nebula.electricity.foundation.electricity.component.*;
 import com.nebula.electricity.foundation.world.object.ElectricProperties;
 import com.nebula.electricity.foundation.world.object.WorldObject;
 import com.nebula.electricity.math.Vector2i;
 
-import static com.nebula.electricity.ElectricitySimulator.CIRCUIT_MANAGER;
+import static com.nebula.electricity.ElectricitySimulator.ELECTRICITY;
 
 public class WiringInputState extends InputState {
     TextureAtlas.AtlasRegion openConnection;
@@ -31,8 +32,6 @@ public class WiringInputState extends InputState {
         junctionConnection = ElectricitySimulator.getGUITexture("junction_connection");
         selectedJunctionConnection = ElectricitySimulator.getGUITexture("selected_junction");
 
-        CIRCUIT_MANAGER.refreshConnectedNodes();
-
         connectingID = -1;
     }
 
@@ -42,7 +41,7 @@ public class WiringInputState extends InputState {
         Vector2i pos;
         Vector2i size = new Vector2i(Constants.SCALE * 8, Constants.SCALE * 9);
 
-        for (CircuitVertex vertex : CIRCUIT_MANAGER.VERTICES.getAll()) {
+        for (CircuitVertex vertex : ELECTRICITY.VERTICES.getAll()) {
             pos = vertex.getRenderPosition();
             if (!unprojected.withinBounds(pos, pos.add(size)))
                 continue;
@@ -59,7 +58,7 @@ public class WiringInputState extends InputState {
             Vector2i coords = ElectricitySimulator.WORLD.coordinatesFromScreenPos(screenPos);
 
             // Is there already a junction here?
-            for (Junction junction : CIRCUIT_MANAGER.VERTICES.getSubset(Junction.class)) {
+            for (Junction junction : ELECTRICITY.VERTICES.getSubset(Junction.class)) {
                 if (junction.getPosition().equals(coords)) {
                     return false;
                 }
@@ -70,7 +69,7 @@ public class WiringInputState extends InputState {
                 return false;
 
             // New Junction!
-            CIRCUIT_MANAGER.VERTICES.add(new Junction(coords));
+            ELECTRICITY.VERTICES.add(new Junction(coords));
             return true;
         }
 
@@ -88,7 +87,7 @@ public class WiringInputState extends InputState {
         ElectricitySimulator.setRenderModeAndStart(true, false);
 
         // Draw nodes
-        for (Node node : CIRCUIT_MANAGER.VERTICES.getSubset(Node.class)) {
+        for (Node node : ELECTRICITY.VERTICES.getSubset(Node.class)) {
             Vector2i drawPos = node.getRenderPosition();
 
             batch.setColor(1, 1, 1, node.getEnabled() ? 1 : 0.5f);
@@ -97,7 +96,7 @@ public class WiringInputState extends InputState {
         }
         // Draw junctions
         batch.setColor(1,1,1,1);
-        for (Junction junction : CIRCUIT_MANAGER.VERTICES.getSubset(Junction.class)) {
+        for (Junction junction : ELECTRICITY.VERTICES.getSubset(Junction.class)) {
             Vector2i drawPos = junction.getRenderPosition();
 
             batch.draw(junction.getID() == connectingID ? selectedJunctionConnection : junctionConnection,
@@ -109,16 +108,18 @@ public class WiringInputState extends InputState {
     public void draw (SpriteBatch batch, ShapeRenderer shapes) {
         ElectricitySimulator.setRenderModeAndStart(false, false);
 
-        // Draw connections
-        shapes.setColor(0.5f,1f,0.2f,1);
-        for (ConnectionReference ref : CIRCUIT_MANAGER.CONNECTIONS.getAllIDs()) {
-            if (!CIRCUIT_MANAGER.CONNECTIONS.get(ref).shouldDraw)
-                continue;
+        // Draw circuits
+        for (Circuit circuit : ELECTRICITY.CIRCUITS) {
+            shapes.setColor(circuit.getDebugColour());
+            for (ConnectionReference ref : circuit.getConnections()) {
+                //if (!ELECTRICITY.CONNECTIONS.get(ref).shouldDraw)
+                //    continue;
 
-            Vector2i startPos = CIRCUIT_MANAGER.VERTICES.get(ref.getID1()).getRenderPosition().add(20);
-            Vector2i endPos   = CIRCUIT_MANAGER.VERTICES.get(ref.getID2()).getRenderPosition().add(20);
+                Vector2i startPos = ELECTRICITY.VERTICES.get(ref.getID1()).getRenderPosition().add(20);
+                Vector2i endPos = ELECTRICITY.VERTICES.get(ref.getID2()).getRenderPosition().add(20);
 
-            shapes.rectLine(startPos.x, startPos.y, endPos.x, endPos.y, 25);
+                shapes.rectLine(startPos.x, startPos.y, endPos.x, endPos.y, 25);
+            }
         }
         shapes.setColor(1,1,1,1);
     }
@@ -133,20 +134,22 @@ public class WiringInputState extends InputState {
         }
 
         // Node to junction connection
-        if (vertex instanceof Node != CIRCUIT_MANAGER.VERTICES.get(connectingID) instanceof Node)
+        if (vertex instanceof Node != ELECTRICITY.VERTICES.get(connectingID) instanceof Node)
             return vertex instanceof Node ?
-                    connectNodeToJunction((Node) vertex, (Junction) CIRCUIT_MANAGER.VERTICES.get(connectingID)) :
-                    connectNodeToJunction((Node) CIRCUIT_MANAGER.VERTICES.get(connectingID), (Junction) vertex);
+                    connectNodeToJunction((Node) vertex, (Junction) ELECTRICITY.VERTICES.get(connectingID)) :
+                    connectNodeToJunction((Node) ELECTRICITY.VERTICES.get(connectingID), (Junction) vertex);
 
         // Junction to junction connection
         if (!(vertex instanceof Node)) {
-            CIRCUIT_MANAGER.CONNECTIONS.add(ConnectionReference.of(vertex.getID(), connectingID), Connection.external());
+            ELECTRICITY.CONNECTIONS.add(ConnectionReference.of(vertex.getID(), connectingID), Connection.external());
+            vertex.setConnected(true);
+            ELECTRICITY.VERTICES.get(connectingID).setConnected(true);
             connectingID = -1;
             return true;
         }
 
         // Node to node connection
-        return connectNodeToNode((Node) vertex, (Node) CIRCUIT_MANAGER.VERTICES.get(connectingID));
+        return connectNodeToNode((Node) vertex, (Node) ELECTRICITY.VERTICES.get(connectingID));
     }
 
     boolean connectNodeToNode (Node a, Node b) {
@@ -154,7 +157,7 @@ public class WiringInputState extends InputState {
             return false;
 
         // We already clicked on another node before, now we establish a connection
-        CIRCUIT_MANAGER.CONNECTIONS.add(ConnectionReference.of(a, b), Connection.external());
+        ELECTRICITY.CONNECTIONS.add(ConnectionReference.of(a, b), Connection.external());
 
         for (WorldObject object : ElectricitySimulator.WORLD.getAllObjects()) {
             if (!object.isElectric())
@@ -170,7 +173,7 @@ public class WiringInputState extends InputState {
                     continue;
 
                 // Cannot connect object to itself!
-                CIRCUIT_MANAGER.CONNECTIONS.delete(ConnectionReference.of(a,b));
+                ELECTRICITY.CONNECTIONS.delete(ConnectionReference.of(a,b));
                 return false;
             }
 
@@ -189,9 +192,11 @@ public class WiringInputState extends InputState {
             return false;
 
         // We already clicked on a junction before, now we establish a connection
-        CIRCUIT_MANAGER.CONNECTIONS.add(ConnectionReference.of(n,j), Connection.external());
+        ELECTRICITY.CONNECTIONS.add(ConnectionReference.of(n,j), Connection.external());
 
         n.setConnected(true);
+        j.setConnected(true);
+
         ElectricitySimulator.WORLD.forEachElectricalObject(object -> {
             if (object.getElectricProperties().containsNode(n.getID()))
                 object.getElectricProperties().update();
@@ -204,18 +209,18 @@ public class WiringInputState extends InputState {
     //endregion
 
     boolean disconnect (CircuitVertex vertex, boolean shouldDelete) {
-        if (vertex instanceof Node)
-            ((Node) vertex).setConnected(false);
+        vertex.setConnected(false);
+
         if (shouldDelete)
-            CIRCUIT_MANAGER.VERTICES.delete(vertex.getID());
+            ELECTRICITY.VERTICES.delete(vertex.getID());
 
-        for (ConnectionReference ref : CIRCUIT_MANAGER.CONNECTIONS.getAllIDs()) {
-            if (ref.containsNode(vertex.getID()) && !CIRCUIT_MANAGER.CONNECTIONS.get(ref).isInternal)
-                CIRCUIT_MANAGER.CONNECTIONS.queueDelete(ref);
+        for (ConnectionReference ref : ELECTRICITY.CONNECTIONS.getAllIDs()) {
+            if (ref.containsVertex(vertex.getID()) && !ELECTRICITY.CONNECTIONS.get(ref).isInternal)
+                ELECTRICITY.CONNECTIONS.queueDelete(ref);
         }
-        CIRCUIT_MANAGER.CONNECTIONS.flush();
+        ELECTRICITY.CONNECTIONS.flush();
 
-        ElectricitySimulator.WORLD.forEachElectricalObject(object -> object.getElectricProperties().recheckConnected());
+        ELECTRICITY.refreshConnected();
 
         return true;
     }

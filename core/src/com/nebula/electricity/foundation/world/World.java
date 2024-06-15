@@ -15,7 +15,7 @@ import com.nebula.electricity.math.Vector2i;
 import java.util.*;
 import java.util.function.Consumer;
 
-import static com.nebula.electricity.ElectricitySimulator.CIRCUIT_MANAGER;
+import static com.nebula.electricity.ElectricitySimulator.ELECTRICITY;
 
 /**
  * Stores all information about the simulation world
@@ -87,7 +87,7 @@ public class World implements Module {
         // Electrical
         object.initElectricProperties();
         if (object.isElectric())
-            CIRCUIT_MANAGER.VERTICES.add(object.getElectricProperties().getNodes());
+            ELECTRICITY.VERTICES.add(object.getElectricProperties().getNodes());
 
         allObjects.put(UUID.randomUUID(), object);
         return true;
@@ -102,15 +102,15 @@ public class World implements Module {
 
         // Remove influence from circuits
         if (object.isElectric()) {
-            CIRCUIT_MANAGER.VERTICES.delete(object.getElectricProperties().getNodes());
+            ELECTRICITY.VERTICES.delete(object.getElectricProperties().getNodes());
 
-            for (ConnectionReference ref : CIRCUIT_MANAGER.CONNECTIONS.getAllIDs()) {
+            for (ConnectionReference ref : ELECTRICITY.CONNECTIONS.getAllIDs()) {
                 if (object.getElectricProperties().containsNode(ref.getID1())
                 || object.getElectricProperties().containsNode(ref.getID2()))
-                    CIRCUIT_MANAGER.CONNECTIONS.queueDelete(ref);
+                    ELECTRICITY.CONNECTIONS.queueDelete(ref);
             }
 
-            CIRCUIT_MANAGER.CONNECTIONS.flush();
+            ELECTRICITY.CONNECTIONS.flush();
         }
 
         return allObjects.remove(id) != null;
@@ -118,7 +118,7 @@ public class World implements Module {
 
     public void clearObjects () {
         allObjects.clear();
-        CIRCUIT_MANAGER.CONNECTIONS.clear();
+        ELECTRICITY.CONNECTIONS.clear();
     }
 
     public Optional<UUID> objectAt (Vector2i pos) {

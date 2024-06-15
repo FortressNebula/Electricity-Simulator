@@ -7,4 +7,6 @@ public interface CircuitVertex {
     Vector2i getRenderPosition ();
     Vector2i getCombinedPosition ();
     boolean canConnect ();
+    boolean getConnected ();
+    void setConnected (boolean value);
 }

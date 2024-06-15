@@ -1,16 +1,17 @@
 package com.nebula.electricity.foundation.electricity.component;
 
 import com.nebula.electricity.foundation.Constants;
-import com.nebula.electricity.foundation.electricity.CircuitManager;
+import com.nebula.electricity.foundation.electricity.Electricity;
 import com.nebula.electricity.math.Vector2i;
 
 public class Junction implements CircuitVertex {
     Vector2i position;
+    boolean isConnected;
     int id;
 
     public Junction (Vector2i position) {
         this.position = position;
-        id = CircuitManager.GLOBAL_VERTEX_ID++;
+        id = Electricity.GLOBAL_VERTEX_ID++;
     }
 
     @Override
@@ -37,4 +38,8 @@ public class Junction implements CircuitVertex {
     public boolean canConnect () {
         return true;
     }
+
+    public boolean getConnected () { return isConnected; }
+    public void setConnected (boolean value) { isConnected = value; }
+
 }

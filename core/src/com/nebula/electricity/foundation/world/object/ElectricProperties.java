@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.nebula.electricity.ElectricitySimulator.CIRCUIT_MANAGER;
+import static com.nebula.electricity.ElectricitySimulator.ELECTRICITY;
 
 public class ElectricProperties {
     // Terminals
@@ -53,31 +53,18 @@ public class ElectricProperties {
         registerUniqueInternalConnection(connected.get(0).getID(), connected.get(1).getID());
     }
 
-    public void recheckConnected () {
-        nodes.forEach(n -> n.setConnected(false));
-
-        for (ConnectionReference ref : CIRCUIT_MANAGER.CONNECTIONS.getAllIDs()) {
-            // Discard internal connections
-            if (CIRCUIT_MANAGER.CONNECTIONS.get(ref).isInternal)
-                continue;
-            // Ignore connections that don't concern us
-            if (!containsNode(ref.getID1()) && !containsNode(ref.getID2()))
-                continue;
-
-            nodes.forEach(n -> n.setConnected(n.getConnected() || ref.containsNode(n.getID())));
-        }
-
+    public void recheckInternalConnection () {
         if (nodes.stream().mapToInt(n -> n.getConnected() ? 1 : 0).sum() < 2 && registeredConnectionID != null) {
             // We have lost our internal connection
             nodes.forEach(n -> n.setEnabled(true));
-            CIRCUIT_MANAGER.CONNECTIONS.delete(registeredConnectionID);
+            ELECTRICITY.CONNECTIONS.delete(registeredConnectionID);
             registeredConnectionID = null;
         }
     }
 
     // Registers an internal connection
     public void registerInternalConnection (int id1, int id2) {
-        CIRCUIT_MANAGER.CONNECTIONS.add(ConnectionReference.of(id1, id2), Connection.internal(voltage, resistance));
+        ELECTRICITY.CONNECTIONS.add(ConnectionReference.of(id1, id2), Connection.internal(voltage, resistance));
         registeredConnectionID = ConnectionReference.of(id1, id2);
     }
 

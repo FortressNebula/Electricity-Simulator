@@ -1,7 +1,7 @@
 package com.nebula.electricity.foundation.electricity.component;
 
 import com.nebula.electricity.foundation.Constants;
-import com.nebula.electricity.foundation.electricity.CircuitManager;
+import com.nebula.electricity.foundation.electricity.Electricity;
 import com.nebula.electricity.math.Direction;
 import com.nebula.electricity.math.Vector2i;
 
@@ -29,7 +29,7 @@ public class Node implements CircuitVertex {
         isConnected = false;
         isEnabled = true;
         isTransformDirty = true;
-        id = CircuitManager.GLOBAL_VERTEX_ID++;
+        id = Electricity.GLOBAL_VERTEX_ID++;
     }
 
     public Node moveTo (Vector2i newPosition) {
