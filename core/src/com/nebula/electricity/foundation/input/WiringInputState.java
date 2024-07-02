@@ -14,6 +14,8 @@ import com.nebula.electricity.foundation.world.object.ElectricProperties;
 import com.nebula.electricity.foundation.world.object.WorldObject;
 import com.nebula.electricity.math.Vector2i;
 
+import java.util.Collection;
+
 import static com.nebula.electricity.ElectricitySimulator.ELECTRICITY;
 
 public class WiringInputState extends InputState {
@@ -22,6 +24,10 @@ public class WiringInputState extends InputState {
     TextureAtlas.AtlasRegion junctionConnection;
     TextureAtlas.AtlasRegion selectedJunctionConnection;
     int connectingID;
+
+    // DEBUG
+    private DEBUG_MODE debugMode = DEBUG_MODE.OFF;
+    private int cycleID = 0;
 
     WiringInputState (Vector2i screenPos) {
         Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
@@ -79,7 +85,21 @@ public class WiringInputState extends InputState {
 
     @Override
     boolean keyDown (int code) {
-        return false;
+        if (code == Input.Keys.D)
+            debugMode = debugMode.next();
+
+        if (debugMode != DEBUG_MODE.CYCLES)
+            return false;
+
+        if (code == Input.Keys.UP)
+            cycleID++;
+
+        if (code == Input.Keys.DOWN)
+            cycleID--;
+
+        System.out.println("Cycle ID is " + cycleID);
+
+        return true;
     }
 
     @Override
@@ -111,17 +131,32 @@ public class WiringInputState extends InputState {
         // Draw circuits
         for (Circuit circuit : ELECTRICITY.CIRCUITS) {
             shapes.setColor(circuit.getDebugColour());
-            for (ConnectionReference ref : circuit.getConnections()) {
-                //if (!ELECTRICITY.CONNECTIONS.get(ref).shouldDraw)
-                //    continue;
 
-                Vector2i startPos = ELECTRICITY.VERTICES.get(ref.getID1()).getRenderPosition().add(20);
-                Vector2i endPos = ELECTRICITY.VERTICES.get(ref.getID2()).getRenderPosition().add(20);
+            if (debugMode == DEBUG_MODE.OFF) {
+                drawConnections(circuit.getConnections(), shapes);
+            } else if (debugMode == DEBUG_MODE.CYCLES) {
+                if (circuit.getCycles().size() <= cycleID || cycleID < 0)
+                    continue;
 
-                shapes.rectLine(startPos.x, startPos.y, endPos.x, endPos.y, 25);
+                drawConnections(circuit.getCycles().get(cycleID).getAll(), shapes);
+            } else {
+                drawConnections(circuit.getSpanningTree(), shapes);
             }
+
         }
         shapes.setColor(1,1,1,1);
+    }
+
+    void drawConnections (Collection<ConnectionReference> all, ShapeRenderer shapes) {
+        for (ConnectionReference ref : all) {
+            if (!ELECTRICITY.CONNECTIONS.get(ref).shouldDraw)
+                return;
+
+            Vector2i startPos = ELECTRICITY.VERTICES.get(ref.getID1()).getRenderPosition().add(20);
+            Vector2i endPos = ELECTRICITY.VERTICES.get(ref.getID2()).getRenderPosition().add(20);
+
+            shapes.rectLine(startPos.x, startPos.y, endPos.x, endPos.y, 25);
+        }
     }
 
     //region Connection
@@ -223,5 +258,16 @@ public class WiringInputState extends InputState {
         ELECTRICITY.refreshConnected();
 
         return true;
+    }
+
+    enum DEBUG_MODE {
+        OFF,
+        CYCLES,
+        SPANNING_TREE;
+
+        DEBUG_MODE next () {
+            int i = ordinal() + 1;
+            return i == values().length ? values()[0] : values()[i];
+        }
     }
 }
