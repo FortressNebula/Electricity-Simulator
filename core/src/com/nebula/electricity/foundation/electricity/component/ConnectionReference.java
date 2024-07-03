@@ -45,6 +45,10 @@ public class ConnectionReference {
 
     @Override
     public int hashCode () {
-        return Objects.hash(id1, id2);
+        // Ensure the same connection reference has the same hash code
+        if (id1 < id2)
+            return Objects.hash(id1, id2);
+        else
+            return Objects.hash(id2, id1);
     }
 }

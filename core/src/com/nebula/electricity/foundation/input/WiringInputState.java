@@ -3,6 +3,7 @@ package com.nebula.electricity.foundation.input;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Cursor;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -28,6 +29,7 @@ public class WiringInputState extends InputState {
     // DEBUG
     private DEBUG_MODE debugMode = DEBUG_MODE.OFF;
     private int cycleID = 0;
+    private final BitmapFont debugFont;
 
     WiringInputState (Vector2i screenPos) {
         Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
@@ -39,6 +41,14 @@ public class WiringInputState extends InputState {
         selectedJunctionConnection = ElectricitySimulator.getGUITexture("selected_junction");
 
         connectingID = -1;
+
+        // DEBUG
+        debugFont = new BitmapFont();
+    }
+
+    @Override
+    public void dispose () {
+        debugFont.dispose();
     }
 
     @Override
@@ -122,6 +132,14 @@ public class WiringInputState extends InputState {
             batch.draw(junction.getID() == connectingID ? selectedJunctionConnection : junctionConnection,
                     drawPos.x, drawPos.y, Constants.SCALE * 8, Constants.SCALE * 9);
         }
+
+        // Draw debug text
+        if (debugMode == DEBUG_MODE.OFF)
+            return;
+
+        ElectricitySimulator.setRenderModeAndStart(true, true);
+        debugFont.draw(batch, debugMode == DEBUG_MODE.CYCLES ? "Cycles: " + cycleID : "Spanning Tree",
+                10, 30);
     }
 
     @Override
@@ -135,10 +153,10 @@ public class WiringInputState extends InputState {
             if (debugMode == DEBUG_MODE.OFF) {
                 drawConnections(circuit.getConnections(), shapes);
             } else if (debugMode == DEBUG_MODE.CYCLES) {
-                if (circuit.getCycles().size() <= cycleID || cycleID < 0)
+                if (cycleID >= circuit.getCycles().size() || cycleID < 0)
                     continue;
 
-                drawConnections(circuit.getCycles().get(cycleID).getAll(), shapes);
+                drawConnections(circuit.getCycles().get(cycleID).getConnections(), shapes);
             } else {
                 drawConnections(circuit.getSpanningTree(), shapes);
             }

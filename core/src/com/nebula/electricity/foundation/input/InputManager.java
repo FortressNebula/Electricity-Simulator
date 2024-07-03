@@ -90,12 +90,18 @@ public class InputManager extends InputAdapter implements Module {
         // Button mechanics
         if (hoveringOverState != null) {
             selectedState = hoveringOverState;
+            state.dispose();
             state = selectedState.create(screenX, screenY);
 
             ELECTRICITY.refreshConnected();
         }
 
         return state.touchDown(new Vector2i(screenX, screenY), pointer, button);
+    }
+
+    @Override
+    public void dispose () {
+        state.dispose();
     }
 
     @Override
