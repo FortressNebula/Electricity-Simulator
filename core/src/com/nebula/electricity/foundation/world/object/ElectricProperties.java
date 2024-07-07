@@ -1,7 +1,7 @@
 package com.nebula.electricity.foundation.world.object;
 
+import com.nebula.electricity.foundation.electricity.component.ConnectionData;
 import com.nebula.electricity.foundation.electricity.component.Connection;
-import com.nebula.electricity.foundation.electricity.component.ConnectionReference;
 import com.nebula.electricity.foundation.electricity.component.Node;
 import com.nebula.electricity.math.Direction;
 import com.nebula.electricity.math.Vector2i;
@@ -17,7 +17,7 @@ public class ElectricProperties {
     // Terminals
     final List<Node> nodes;
     final Set<Integer> ids;
-    ConnectionReference registeredConnectionID;
+    Connection registeredConnectionID;
     // Electrical information
     float resistance;
     float voltage;
@@ -64,8 +64,8 @@ public class ElectricProperties {
 
     // Registers an internal connection
     public void registerInternalConnection (int id1, int id2) {
-        ELECTRICITY.CONNECTIONS.add(ConnectionReference.of(id1, id2), Connection.internal(voltage, resistance));
-        registeredConnectionID = ConnectionReference.of(id1, id2);
+        ELECTRICITY.CONNECTIONS.add(Connection.of(id1, id2), ConnectionData.internal(voltage, resistance, id1 > id2));
+        registeredConnectionID = Connection.of(id1, id2);
     }
 
     // Registers an internal connection and disables all the other nodes

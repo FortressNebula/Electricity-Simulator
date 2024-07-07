@@ -1,53 +1,34 @@
 package com.nebula.electricity.foundation.electricity.circuit;
 
-import com.nebula.electricity.foundation.electricity.component.ConnectionReference;
+import com.nebula.electricity.foundation.electricity.component.Connection;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class FundamentalCycle {
-    List<ConnectionReference> connections;
+    List<Connection> connections;
+    boolean isValid;
 
-    private FundamentalCycle (List<ConnectionReference> connections) {
+    FundamentalCycle (List<Connection> connections, boolean isValid) {
         this.connections = connections;
+        this.isValid = isValid;
     }
 
-    public static FundamentalCycle generate (Collection<ConnectionReference> spanningTree, ConnectionReference removed) {
-        List<ConnectionReference> all = new ArrayList<>(spanningTree);
-        all.add(removed);
+    public List<Connection> getConnections () { return connections; }
 
-        List<Integer> nodes = new Pruner(all).prune(removed);
-
-        if (nodes.size() == 0)
-            return new FundamentalCycle(List.of());
-
-        // TODO: orient the connections
-        // For now, simply orient them going forwards.
-
-        all.clear();
-        for (int i = 0; i < nodes.size() - 1; i++) {
-            all.add(ConnectionReference.of(nodes.get(i), nodes.get(i + 1)));
-        }
-        all.add(ConnectionReference.of(nodes.get(nodes.size() - 1), nodes.get(0)));
-
-        return new FundamentalCycle(all);
-    }
-
-    public List<ConnectionReference> getConnections () { return connections; }
-
-    private static class Pruner {
+    static class Pruner {
         List<Integer> path;
-        List<ConnectionReference> visited;
-        List<ConnectionReference> all;
+        List<Connection> visited;
+        List<Connection> all;
 
-        Pruner (List<ConnectionReference> all) {
+        Pruner (List<Connection> all) {
             this.all = all;
             this.visited = new ArrayList<>();
             this.path = new ArrayList<>();
         }
 
         // Returns the list of nodes which are present in the fundamental ring
-        List<Integer> prune (ConnectionReference removed) {
+        List<Integer> prune (Connection removed) {
             //Starting from one of the removed nodes as the root of a DFS tree, we can search until we find the other removed node.
             findPath(0, removed.getID1(), removed.getID2());
             return path;
@@ -64,7 +45,7 @@ public class FundamentalCycle {
             }
 
             // Check all connections that feature this vertex and have NOT been visited
-            List<ConnectionReference> adjacent = all.stream()
+            List<Connection> adjacent = all.stream()
                     .filter(ref -> ref.containsVertex(at))
                     .filter(ref -> !visited.contains(ref))
                     .collect(Collectors.toList());
@@ -72,7 +53,7 @@ public class FundamentalCycle {
             if (adjacent.size() == 0) // We have reached the end of a branch.
                 return false;
 
-            for (ConnectionReference ref : adjacent) {
+            for (Connection ref : adjacent) {
                 // Visit each node
                 visited.add(ref);
                 if (findPath(depth + 1, ref.getOther(at), destination)) {

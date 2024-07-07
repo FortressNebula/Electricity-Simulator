@@ -8,7 +8,7 @@ import com.badlogic.gdx.utils.OrderedMap;
 import com.nebula.electricity.ElectricitySimulator;
 import com.nebula.electricity.foundation.Constants;
 import com.nebula.electricity.foundation.Module;
-import com.nebula.electricity.foundation.electricity.component.ConnectionReference;
+import com.nebula.electricity.foundation.electricity.component.Connection;
 import com.nebula.electricity.foundation.world.object.WorldObject;
 import com.nebula.electricity.math.Vector2i;
 
@@ -68,10 +68,6 @@ public class World implements Module {
     // Object methods
     public Array<WorldObject> getAllObjects () { return allObjects.values().toArray(); }
 
-    public void forEachObject (Consumer<WorldObject> func) {
-        allObjects.forEach(entry -> func.accept(entry.value));
-    }
-
     public void forEachElectricalObject (Consumer<WorldObject> func) {
         allObjects.forEach(entry -> {
             if (entry.value.isElectric())
@@ -104,7 +100,7 @@ public class World implements Module {
         if (object.isElectric()) {
             ELECTRICITY.VERTICES.delete(object.getElectricProperties().getNodes());
 
-            for (ConnectionReference ref : ELECTRICITY.CONNECTIONS.getAllIDs()) {
+            for (Connection ref : ELECTRICITY.CONNECTIONS.getAllIDs()) {
                 if (object.getElectricProperties().containsNode(ref.getID1())
                 || object.getElectricProperties().containsNode(ref.getID2()))
                     ELECTRICITY.CONNECTIONS.queueDelete(ref);

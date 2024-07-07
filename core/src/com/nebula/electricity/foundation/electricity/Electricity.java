@@ -20,7 +20,7 @@ public class Electricity implements Module {
     public static int GLOBAL_VERTEX_ID = 0;
 
     public final Registry<Integer, CircuitVertex> VERTICES;
-    public final Registry<ConnectionReference, Connection> CONNECTIONS;
+    public final Registry<Connection, ConnectionData> CONNECTIONS;
 
     public final List<Circuit> CIRCUITS;
 
@@ -35,17 +35,17 @@ public class Electricity implements Module {
 
         CONNECTIONS = new Registry<>() {
             @Override
-            ConnectionReference makeID (Connection component) {
+            Connection makeID (ConnectionData component) {
                 throw new IllegalStateException("what on earth are you doing");
             }
 
             @Override
-            void onAdded (ConnectionReference id) {
+            void onAdded (Connection id) {
                 mergeOrCreateCircuit(id);
             }
 
             @Override
-            void onDeleted (ConnectionReference id) {
+            void onDeleted (Connection id) {
                 splitOrDeleteCircuit(id);
             }
 
@@ -62,7 +62,7 @@ public class Electricity implements Module {
     public void refreshConnected () {
         VERTICES.all.forEach((integer, circuitVertex) -> circuitVertex.setConnected(false));
 
-        for (ConnectionReference ref : CONNECTIONS.getAllIDs()) {
+        for (Connection ref : CONNECTIONS.getAllIDs()) {
             // Discard internal connections
             if (ELECTRICITY.CONNECTIONS.get(ref).isInternal)
                 continue;
@@ -74,7 +74,7 @@ public class Electricity implements Module {
         ElectricitySimulator.WORLD.forEachElectricalObject(object -> object.getElectricProperties().recheckInternalConnection());
     }
 
-    void mergeOrCreateCircuit (ConnectionReference ref) {
+    void mergeOrCreateCircuit (Connection ref) {
         Optional<Integer> index1 = getCircuitIndex(ref.getID1());
         Optional<Integer> index2 = getCircuitIndex(ref.getID2());
 
@@ -99,7 +99,7 @@ public class Electricity implements Module {
         }
     }
 
-    void splitOrDeleteCircuit (ConnectionReference ref) {
+    void splitOrDeleteCircuit (Connection ref) {
         Optional<Integer> optionalIndex = getCircuitIndex(ref.getID1());
         if (!optionalIndex.isPresent())
             return;
@@ -135,8 +135,8 @@ public class Electricity implements Module {
         return Optional.empty();
     }
 
-    List<ConnectionReference> getSubgraphFrom (int start) {
-        List<ConnectionReference> visited = new ArrayList<>();
+    List<Connection> getSubgraphFrom (int start) {
+        List<Connection> visited = new ArrayList<>();
         Deque<Integer> stack = new ArrayDeque<>();
         stack.push(start);
 
@@ -145,12 +145,12 @@ public class Electricity implements Module {
             int i = stack.pop();
 
             // Check all connections that feature this vertex and have NOT been visited
-            List<ConnectionReference> adjacent = CONNECTIONS.getAllIDs().stream()
+            List<Connection> adjacent = CONNECTIONS.getAllIDs().stream()
                     .filter(ref -> ref.containsVertex(i))
                     .filter(ref -> !visited.contains(ref))
                     .collect(Collectors.toList());
 
-            for (ConnectionReference ref : adjacent) {
+            for (Connection ref : adjacent) {
                 // Visit each connection
                 visited.add(ref);
 
@@ -214,7 +214,7 @@ public class Electricity implements Module {
 
     private void drawConnectionsWithYOffset (ShapeRenderer shapes, int offset) {
         // Draw connections
-        for (ConnectionReference ref : ELECTRICITY.CONNECTIONS.getAllIDs()) {
+        for (Connection ref : ELECTRICITY.CONNECTIONS.getAllIDs()) {
             if (!ELECTRICITY.CONNECTIONS.get(ref).shouldDraw)
                 continue;
 
