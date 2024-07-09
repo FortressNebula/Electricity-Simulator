@@ -1,5 +1,6 @@
 package com.nebula.electricity.foundation.electricity.circuit;
 
+import com.nebula.electricity.ElectricitySimulator;
 import com.nebula.electricity.foundation.electricity.component.Connection;
 
 import java.util.*;
@@ -7,11 +8,23 @@ import java.util.stream.Collectors;
 
 public class FundamentalCycle {
     List<Connection> connections;
-    boolean isValid;
+    Circuit.CircuitDirection direction;
+    double current;
 
-    FundamentalCycle (List<Connection> connections, boolean isValid) {
+    FundamentalCycle (List<Connection> connections, Circuit.CircuitDirection direction) {
         this.connections = connections;
-        this.isValid = isValid;
+        this.direction = direction;
+        this.current = 0;
+    }
+
+    void setCurrent (double current) {
+        this.current = current;
+    }
+
+    void addCurrentToConnections () {
+        for (Connection connection : connections) {
+            ElectricitySimulator.ELECTRICITY.CONNECTIONS.get(connection).addCurrent(current);
+        }
     }
 
     public List<Connection> getConnections () { return connections; }

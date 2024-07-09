@@ -55,6 +55,7 @@ project(":core") {
 
 
     dependencies {
+        implementation 'gov.nist.math:jama:1.0.3'
         api "com.badlogicgames.gdx:gdx:$gdxVersion"
         
     }

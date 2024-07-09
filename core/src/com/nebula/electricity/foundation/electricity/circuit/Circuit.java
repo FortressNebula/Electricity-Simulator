@@ -1,5 +1,6 @@
 package com.nebula.electricity.foundation.electricity.circuit;
 
+import Jama.Matrix;
 import com.badlogic.gdx.graphics.Color;
 import com.nebula.electricity.ElectricitySimulator;
 import com.nebula.electricity.foundation.electricity.component.Connection;
@@ -67,13 +68,73 @@ public class Circuit {
 
     // Using the newly-collected array of connections, update the fundamental cycles
     public void update () {
+        fundamentalCycles.clear();
+        // Make all connections undirected
+        connections.keySet().forEach(ref -> {
+            connections.put(ref, CircuitDirection.UNDIRECTED);
+            ElectricitySimulator.ELECTRICITY.CONNECTIONS.get(ref).reset();
+        });
+
+        generateCycles();
+
+        if (fundamentalCycles.isEmpty())
+            return;
+        if (fundamentalCycles.stream().noneMatch(cycle -> cycle.direction != CircuitDirection.INVALID))
+            return;
+
+        solve();
+    }
+
+    void solve () {
+        Matrix resistances = new Matrix(fundamentalCycles.size(), fundamentalCycles.size(), 0);
+        Matrix voltages = new Matrix(fundamentalCycles.size(), 1, 0);
+        
+        // Populate matrices
+        for (int i = 0; i < fundamentalCycles.size(); i++) {
+            // Set voltage by summing up voltage rises in the cycle
+            FundamentalCycle primaryCycle = fundamentalCycles.get(i);
+
+            voltages.set(i, 0, primaryCycle.connections.stream()
+                    .mapToDouble(connection -> ElectricitySimulator.ELECTRICITY.CONNECTIONS.get(connection)
+                            .getVoltage(connections.get(connection)))
+                    .sum()
+            );
+
+            // Set resistance row by looping through fundamental cycles and finding common branches
+            for (int j = 0; j < fundamentalCycles.size(); j++) {
+                FundamentalCycle secondaryCycle = fundamentalCycles.get(j);
+
+                if (secondaryCycle.direction == CircuitDirection.INVALID)
+                    continue;
+
+                // Sum up all the resistances of the common branches
+                double resistance = secondaryCycle.connections.stream()
+                        .filter(connection -> primaryCycle.connections.contains(connection))
+                        .mapToDouble(connection -> ElectricitySimulator.ELECTRICITY.CONNECTIONS.get(connection)
+                                .getResistance())
+                        .sum();
+
+                resistances.set(i, j,
+                        Math.max(resistance, 0.000001) * (secondaryCycle.direction != primaryCycle.direction ? -1 :1)
+                );
+            }
+        }
+
+        // Solve!
+        Matrix currents = resistances.solve(voltages);
+
+        for (int i = 0; i < fundamentalCycles.size(); i++) {
+            fundamentalCycles.get(i).setCurrent(currents.get(i, 0));
+            fundamentalCycles.get(i).addCurrentToConnections();
+
+            System.out.println(currents.get(i, 0));
+        }
+    }
+
+    void generateCycles () {
         List<Connection> spanningTree = getSpanningTree();
         if (spanningTree.isEmpty())
             return;
-
-        fundamentalCycles.clear();
-        // Make all connections undirected
-        connections.keySet().forEach(ref -> connections.put(ref, CircuitDirection.UNDIRECTED));
 
         List<Connection> removedConnections = connections.keySet().stream()
                 .filter(ref -> !spanningTree.contains(ref))
@@ -92,7 +153,7 @@ public class Circuit {
         List<Connection> cycleConnections = new ArrayList<>();
 
         if (nodes.size() == 0)
-            return new FundamentalCycle(List.of(), false);
+            return new FundamentalCycle(List.of(), CircuitDirection.INVALID);
 
         nodes.add(nodes.get(0)); // Just to make it easier to loop around
 
@@ -132,7 +193,7 @@ public class Circuit {
             cycleConnections.add(Connection.of(from, to));
         }
 
-        return new FundamentalCycle(cycleConnections, direction != CircuitDirection.INVALID);
+        return new FundamentalCycle(cycleConnections, direction);
     }
 
     public List<FundamentalCycle> getCycles () { return fundamentalCycles; }

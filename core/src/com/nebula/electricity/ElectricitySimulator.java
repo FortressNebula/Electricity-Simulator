@@ -30,6 +30,7 @@ import java.util.Random;
 public class ElectricitySimulator extends ApplicationAdapter {
 	// All modules
 	public static Module[] MODULES = new Module[]{};
+	private static final boolean DEBUG_MODE = false;
 
 	public static final Electricity ELECTRICITY = add(new Electricity());
 	public static final World WORLD = add(new World());
@@ -72,6 +73,11 @@ public class ElectricitySimulator extends ApplicationAdapter {
 		AllWorldObjects.register();
 		// Post initialisation event for any other objects/entities
 		Events.INIT.post();
+
+		if (DEBUG_MODE) {
+			System.out.println("DEBUG MODE IS ON!!!!!!!!");
+			DebugHook.run();
+		}
 	}
 
 	/**
