@@ -28,7 +28,7 @@ public class BulbObject extends SimpleObject {
 
     @Override
     public ElectricProperties createElectricProperties () {
-        return ElectricProperties.make()
+        return new ElectricProperties()
                 .resistance(6f)
                 .addNode(0, 0, Direction.LEFT)
                 .addNode(0, 0, Direction.UP)

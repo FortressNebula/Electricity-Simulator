@@ -189,8 +189,8 @@ public class WiringInputState extends InputState {
 
     void drawConnections (Collection<Connection> all, ShapeRenderer shapes, boolean drawInternals) {
         for (Connection ref : all) {
-            if (!ELECTRICITY.CONNECTIONS.get(ref).shouldDraw && !drawInternals)
-                continue;
+            //if (!ELECTRICITY.CONNECTIONS.get(ref).shouldDraw && !drawInternals)
+            //    continue;
 
             Vector2i startPos = ELECTRICITY.VERTICES.get(ref.getID1()).getRenderPosition().add(20);
             Vector2i endPos = ELECTRICITY.VERTICES.get(ref.getID2()).getRenderPosition().add(20);

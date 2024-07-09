@@ -43,15 +43,20 @@ public class Electricity implements Module {
             @Override
             void onAdded (Connection id) {
                 mergeOrCreateCircuit(id);
+                Events.CIRCUIT_UPDATE.post();
             }
 
             @Override
             void onDeleted (Connection id) {
                 splitOrDeleteCircuit(id);
+                Events.CIRCUIT_UPDATE.post();
             }
 
             @Override
-            void onClear () { CIRCUITS.clear(); }
+            void onClear () {
+                CIRCUITS.clear();
+                Events.CIRCUIT_UPDATE.post();
+            }
         };
 
         CIRCUITS = new ArrayList<>();

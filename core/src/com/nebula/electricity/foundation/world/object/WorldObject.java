@@ -41,7 +41,7 @@ public abstract class WorldObject {
             return;
 
         Events.CIRCUIT_UPDATE.add(this::onCircuitUpdate);
-        electricProperties.onConnectionDestroyed = this::onCircuitUpdate;
+        electricProperties.onInternalConnectionUpdate = this::onCircuitUpdate;
     }
 
     // Graphics methods

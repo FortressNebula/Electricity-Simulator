@@ -1,38 +1,35 @@
 package com.nebula.electricity.foundation.world.object;
 
-import com.nebula.electricity.foundation.electricity.component.ConnectionData;
 import com.nebula.electricity.foundation.electricity.component.Connection;
+import com.nebula.electricity.foundation.electricity.component.ConnectionData;
 import com.nebula.electricity.foundation.electricity.component.Node;
 import com.nebula.electricity.math.Direction;
 import com.nebula.electricity.math.Vector2i;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.nebula.electricity.ElectricitySimulator.ELECTRICITY;
 
 public class ElectricProperties {
     // Terminals
-    final List<Node> nodes;
-    final Set<Integer> ids;
-    Connection registeredConnectionID;
+    protected final List<Node> nodes;
+    protected final Set<Integer> ids;
+    protected Connection registeredConnectionID;
     // Electrical information
-    float resistance;
-    float voltage;
+    protected float resistance;
+    protected float voltage;
+    // Update behaviour
+    protected Runnable onInternalConnectionUpdate = () -> {};
+    protected boolean shouldHandleInternalConnectionAutomatically;
 
-    Runnable onConnectionDestroyed = () -> {};
-
-    protected ElectricProperties (List<Node> nodes, float voltage, float resistance) {
-        this.nodes = nodes;
-        this.ids = nodes.stream()
-                .map(Node::getID)
-                .collect(Collectors.toSet());
+    public ElectricProperties () {
+        this.nodes = new ArrayList<>();
+        this.ids = new HashSet<>();
         this.registeredConnectionID = null;
-        this.voltage = voltage;
-        this.resistance = resistance;
+        this.voltage = 0;
+        this.resistance = 0;
+        this.shouldHandleInternalConnectionAutomatically = true;
     }
 
     public List<Node> getNodes () { return nodes; }
@@ -50,7 +47,7 @@ public class ElectricProperties {
 
         if (connected.size() < 2) {
             registeredConnectionID = null;
-            onConnectionDestroyed.run();
+            onInternalConnectionUpdate.run();
             return;
         }
 
@@ -61,15 +58,19 @@ public class ElectricProperties {
         if (nodes.stream().mapToInt(n -> n.getConnected() ? 1 : 0).sum() < 2 && registeredConnectionID != null) {
             // We have lost our internal connection
             nodes.forEach(n -> n.setEnabled(true));
-            ELECTRICITY.CONNECTIONS.delete(registeredConnectionID);
+            if (shouldHandleInternalConnectionAutomatically)
+                ELECTRICITY.CONNECTIONS.delete(registeredConnectionID);
             registeredConnectionID = null;
+            onInternalConnectionUpdate.run();
         }
     }
 
     // Registers an internal connection
     void registerInternalConnection (int id1, int id2) {
-        ELECTRICITY.CONNECTIONS.add(Connection.of(id1, id2), ConnectionData.internal(voltage, resistance, id1 > id2));
-        registeredConnectionID = Connection.of(id1, id2);
+        if (shouldHandleInternalConnectionAutomatically)
+            ELECTRICITY.CONNECTIONS.add(Connection.of(id1, id2), ConnectionData.internal(voltage, resistance, id1 > id2));
+        registeredConnectionID = Connection.directed(id1, id2);
+        onInternalConnectionUpdate.run();
     }
 
     // Registers an internal connection and disables all the other nodes
@@ -86,38 +87,26 @@ public class ElectricProperties {
         return Optional.ofNullable(registeredConnectionID);
     }
 
-    // Use in the WorldObject#makeElectricHandler function
-    public static Builder make () { return new Builder(); }
+    // Builder methods
+    public ElectricProperties resistance (float resistance) {
+        this.resistance = resistance;
+        return this;
+    }
 
-    public static class Builder {
-        List<Node> nodes;
-        float resistance;
-        float voltage;
+    public ElectricProperties voltage (float voltage) {
+        this.voltage = voltage;
+        return this;
+    }
 
-        private Builder () {
-            nodes = new ArrayList<>();
-            voltage = 0f;
-            resistance = 0f;
-        }
+    public ElectricProperties addNode (int x, int y, Direction direction) {
+        Node n = new Node(x, y, direction);
+        nodes.add(n);
+        ids.add(n.getID());
+        return this;
+    }
 
-        public Builder resistance (float resistance) {
-            this.resistance = resistance;
-            return this;
-        }
-
-        public Builder voltage (float voltage) {
-            this.voltage = voltage;
-            return this;
-        }
-
-        public Builder addNode (int x, int y, Direction direction) {
-            nodes.add(new Node(x, y, direction));
-            return this;
-        }
-
-        public ElectricProperties buildAt (Vector2i position, Vector2i size, Direction direction) {
-            nodes.forEach(n -> n.rotate(size, direction).moveTo(position));
-            return new ElectricProperties(nodes, voltage, resistance);
-        }
+    public ElectricProperties buildAt (Vector2i position, Vector2i size, Direction direction) {
+        nodes.forEach(n -> n.rotate(size, direction).moveTo(position));
+        return this;
     }
 }

@@ -23,6 +23,14 @@ public class Connection {
         return of(i.getID(), j.getID());
     }
 
+    public static Connection of (Connection directed) {
+        return of(directed.id1, directed.id2);
+    }
+
+    public static Connection directed (int i, int j) {
+        return new Connection(i, j);
+    }
+
     public boolean containsVertex (int id) {
         return id1 == id || id2 == id;
     }

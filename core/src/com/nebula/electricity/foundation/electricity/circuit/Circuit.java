@@ -4,8 +4,6 @@ import Jama.Matrix;
 import com.badlogic.gdx.graphics.Color;
 import com.nebula.electricity.ElectricitySimulator;
 import com.nebula.electricity.foundation.electricity.component.Connection;
-import com.nebula.electricity.foundation.events.Events;
-import com.nebula.electricity.foundation.world.object.WorldObject;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -79,10 +77,9 @@ public class Circuit {
 
         generateCycles();
 
-        if (fundamentalCycles.stream().noneMatch(cycle -> cycle.direction != CircuitDirection.INVALID)) {
-            Events.CIRCUIT_UPDATE.post();
+        if (fundamentalCycles.stream().noneMatch(cycle -> cycle.direction != CircuitDirection.INVALID))
             return;
-        }
+
 
         solve();
     }
@@ -129,8 +126,6 @@ public class Circuit {
             fundamentalCycles.get(i).setCurrent(currents.get(i, 0));
             fundamentalCycles.get(i).addCurrentToConnections();
         }
-
-        Events.CIRCUIT_UPDATE.post();
     }
 
     void generateCycles () {
