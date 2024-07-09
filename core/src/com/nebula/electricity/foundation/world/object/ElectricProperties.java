@@ -8,6 +8,7 @@ import com.nebula.electricity.math.Vector2i;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -21,6 +22,8 @@ public class ElectricProperties {
     // Electrical information
     float resistance;
     float voltage;
+
+    Runnable onConnectionDestroyed = () -> {};
 
     protected ElectricProperties (List<Node> nodes, float voltage, float resistance) {
         this.nodes = nodes;
@@ -47,6 +50,7 @@ public class ElectricProperties {
 
         if (connected.size() < 2) {
             registeredConnectionID = null;
+            onConnectionDestroyed.run();
             return;
         }
 
@@ -63,19 +67,23 @@ public class ElectricProperties {
     }
 
     // Registers an internal connection
-    public void registerInternalConnection (int id1, int id2) {
+    void registerInternalConnection (int id1, int id2) {
         ELECTRICITY.CONNECTIONS.add(Connection.of(id1, id2), ConnectionData.internal(voltage, resistance, id1 > id2));
         registeredConnectionID = Connection.of(id1, id2);
     }
 
     // Registers an internal connection and disables all the other nodes
-    public void registerUniqueInternalConnection (int id1, int id2) {
+    void registerUniqueInternalConnection (int id1, int id2) {
         registerInternalConnection(id1, id2);
 
         nodes.forEach( n -> {
             if (n.getID() != id1 && n.getID() != id2)
                 n.setEnabled(false);
         });
+    }
+
+    public Optional<Connection> getInternalID () {
+        return Optional.ofNullable(registeredConnectionID);
     }
 
     // Use in the WorldObject#makeElectricHandler function

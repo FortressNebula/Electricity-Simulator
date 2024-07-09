@@ -8,6 +8,7 @@ import com.nebula.electricity.foundation.Constants;
 import com.nebula.electricity.foundation.Module;
 import com.nebula.electricity.foundation.electricity.circuit.Circuit;
 import com.nebula.electricity.foundation.electricity.component.*;
+import com.nebula.electricity.foundation.events.Events;
 import com.nebula.electricity.math.Direction;
 import com.nebula.electricity.math.Vector2i;
 

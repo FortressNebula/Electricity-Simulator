@@ -50,6 +50,9 @@ public class WorldObjectProperties {
     public float getFloat (String name) {
         return get(name, Float.class);
     }
+    public double getDouble (String name) {
+        return get(name, Double.class);
+    }
     public Direction getDirection () {
         return getDirection("direction");
     }

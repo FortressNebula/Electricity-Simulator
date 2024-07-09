@@ -2,9 +2,9 @@ package com.nebula.electricity.math;
 
 public enum Direction {
     UP   (true ),
-    LEFT (false),
+    RIGHT(false),
     DOWN (true ),
-    RIGHT(false)
+    LEFT (false)
     ;
 
     final boolean swapXandY;
@@ -13,18 +13,18 @@ public enum Direction {
         this.swapXandY = swapXandY;
     }
 
-    // Rotate a vector pointing LEFT to a vector pointing in this direction
+    // Rotate a vector pointing RIGHT to a vector pointing in this direction
     public Vector2i fakeRotate (Vector2i v) {
         return swapXandY ? v.swap() : v;
     }
 
-    // Correctly rotate a vector pointing LEFT to a vector pointing in this direction
+    // Correctly rotate a vector pointing RIGHT to a vector pointing in this direction
     public Vector2i rotate (Vector2i v, Vector2i size) {
         switch (this) {
-            case LEFT:  return v;
-            case RIGHT: return new Vector2i(size.x - v.x - 1, size.y - v.y - 1);
-            case UP:    return new Vector2i(size.x - v.y - 1, v.x);
-            case DOWN:  return new Vector2i(v.y, size.y - v.x - 1);
+            case RIGHT:  return v;
+            case LEFT: return new Vector2i(size.x - 1 - v.x, size.y - 1 - v.y);
+            case UP:    return new Vector2i(size.x - 1 - v.y, v.x);
+            case DOWN:  return new Vector2i(v.y, size.y - 1 - v.x);
         }
 
         return Vector2i.INVALID;

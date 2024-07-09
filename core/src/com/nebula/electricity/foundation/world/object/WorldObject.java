@@ -3,6 +3,7 @@ package com.nebula.electricity.foundation.world.object;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.nebula.electricity.foundation.Constants;
+import com.nebula.electricity.foundation.events.Events;
 import com.nebula.electricity.math.Vector2i;
 
 public abstract class WorldObject {
@@ -17,6 +18,8 @@ public abstract class WorldObject {
 
     // Behavioural methods
     public void onClick (boolean left) {}
+
+    public void onCircuitUpdate () {}
 
     // Override for electric objects
     // Called when object is added to the list of world objects
@@ -33,6 +36,12 @@ public abstract class WorldObject {
 
     public void initElectricProperties () {
         electricProperties = createElectricProperties();
+
+        if (!isElectric)
+            return;
+
+        Events.CIRCUIT_UPDATE.add(this::onCircuitUpdate);
+        electricProperties.onConnectionDestroyed = this::onCircuitUpdate;
     }
 
     // Graphics methods

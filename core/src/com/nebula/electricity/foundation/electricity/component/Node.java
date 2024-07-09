@@ -40,7 +40,7 @@ public class Node implements CircuitVertex {
 
     public Node rotate (Vector2i size, Direction newDirection) {
         position = newDirection.rotate(position, size);
-        direction = direction.cycle(1 - newDirection.ordinal());
+        direction = direction.cycle(newDirection.ordinal() - 1);
         isTransformDirty = true;
         return this;
     }

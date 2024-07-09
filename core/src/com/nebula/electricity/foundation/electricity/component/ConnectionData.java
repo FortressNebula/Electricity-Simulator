@@ -37,6 +37,10 @@ public class ConnectionData {
         return resistance;
     }
 
+    public double getCurrent () {
+        return current;
+    }
+
     // Modification
 
     public void reset () {
