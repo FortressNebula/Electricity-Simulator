@@ -15,6 +15,7 @@ import com.nebula.electricity.content.world.AllWorldObjects;
 import com.nebula.electricity.foundation.Module;
 import com.nebula.electricity.foundation.electricity.Electricity;
 import com.nebula.electricity.foundation.events.Events;
+import com.nebula.electricity.foundation.explosion.CircuitExplosionManager;
 import com.nebula.electricity.foundation.input.InputManager;
 import com.nebula.electricity.foundation.world.World;
 import com.nebula.electricity.math.Vector2i;
@@ -35,6 +36,7 @@ public class ElectricitySimulator extends ApplicationAdapter {
 	public static final Electricity ELECTRICITY = add(new Electricity());
 	public static final World WORLD = add(new World());
 	public static final InputManager INPUT_MANAGER = add(new InputManager());
+	public static final CircuitExplosionManager EXPLOSION_MANAGER = add(new CircuitExplosionManager());
 
 	// Rendering information
 	private static final Color BACKGROUND_COLOUR = Color.valueOf("5e6385");
@@ -98,10 +100,10 @@ public class ElectricitySimulator extends ApplicationAdapter {
 		// Draw all modules
 		ScreenUtils.clear(BACKGROUND_COLOUR);
 
-		setRenderModeAndStart(true, false);
 		batch.begin();
+		setRenderModeAndStart(true, false);
 		batch.setColor(1,1,1,1);
-		ElectricitySimulator.WORLD.renderer.drawGround(batch);
+		ElectricitySimulator.WORLD.renderer.drawBackground(batch);
 		for (Module m : MODULES)
 			m.draw(batch, shapes);
 
@@ -149,11 +151,11 @@ public class ElectricitySimulator extends ApplicationAdapter {
 			// Switching from sprite batch to geometry, or otherwise
 			if (isUsingSpriteBatch) {
 				if (batch.isDrawing()) batch.end();
-				shapes.begin(ShapeRenderer.ShapeType.Filled);
+				if (!shapes.isDrawing()) shapes.begin(ShapeRenderer.ShapeType.Filled);
 				shapes.setProjectionMatrix(shouldUseGUICamera ? guiCamera.combined : camera.combined);
 			} else {
 				if (shapes.isDrawing()) shapes.end();
-				batch.begin();
+				if (!batch.isDrawing()) batch.begin();
 				batch.setProjectionMatrix(shouldUseGUICamera ? guiCamera.combined : camera.combined);
 			}
 		} else {

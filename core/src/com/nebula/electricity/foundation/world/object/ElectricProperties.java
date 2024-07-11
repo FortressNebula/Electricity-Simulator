@@ -19,6 +19,7 @@ public class ElectricProperties {
     // Electrical information
     protected float resistance;
     protected float voltage;
+    protected float maxCurrent;
     // Update behaviour
     protected Runnable onInternalConnectionUpdate = () -> {};
     protected boolean shouldHandleInternalConnectionAutomatically;
@@ -29,10 +30,12 @@ public class ElectricProperties {
         this.registeredConnectionID = null;
         this.voltage = 0;
         this.resistance = 0;
+        this.maxCurrent = 100;
         this.shouldHandleInternalConnectionAutomatically = true;
     }
 
     public List<Node> getNodes () { return nodes; }
+    public float getMaxCurrent () { return maxCurrent; }
 
     public boolean containsNode (int id) { return ids.contains(id); }
 
@@ -95,6 +98,11 @@ public class ElectricProperties {
 
     public ElectricProperties voltage (float voltage) {
         this.voltage = voltage;
+        return this;
+    }
+
+    public ElectricProperties maxCurrent (float current) {
+        this.maxCurrent = current;
         return this;
     }
 

@@ -5,7 +5,10 @@ import com.badlogic.gdx.graphics.Color;
 import com.nebula.electricity.ElectricitySimulator;
 import com.nebula.electricity.foundation.electricity.component.Connection;
 
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class Circuit {
@@ -126,13 +129,13 @@ public class Circuit {
         // Solve!
         Matrix currents = new Matrix(fundamentalCycles.size(), 1);
 
-        System.out.println("RESISTANCES");
-        resistances.print(3, 3);
+        //System.out.println("RESISTANCES");
+        //resistances.print(3, 3);
 
         try {
             currents = resistances.solve(voltages);
-            System.out.println("CURRENTS");
-            currents.print(3, 3);
+            //System.out.println("CURRENTS");
+            //currents.print(3, 3);
         } catch (RuntimeException e) {
             System.out.println("FAILED!!");
             e.printStackTrace();

@@ -1,201 +1,222 @@
 
 main.png
-size: 250, 140
+size: 310, 139
 format: RGBA8888
 filter: Linear, Nearest
 repeat: none
 background/dark
   rotate: false
-  xy: 171, 2
+  xy: 69, 1
   size: 32, 27
   orig: 32, 27
   offset: 0, 0
   index: -1
 background/dark_wall
   rotate: false
-  xy: 205, 50
+  xy: 103, 1
   size: 32, 8
   orig: 32, 8
   offset: 0, 0
   index: -1
+background/fire1
+  rotate: false
+  xy: 69, 30
+  size: 32, 43
+  orig: 32, 43
+  offset: 0, 0
+  index: -1
+background/fire2
+  rotate: false
+  xy: 103, 56
+  size: 32, 43
+  orig: 32, 43
+  offset: 0, 0
+  index: -1
+background/fire3
+  rotate: false
+  xy: 103, 11
+  size: 32, 43
+  orig: 32, 43
+  offset: 0, 0
+  index: -1
 background/light
   rotate: false
-  xy: 205, 60
+  xy: 171, 14
   size: 32, 27
   orig: 32, 27
   offset: 0, 0
   index: -1
 background/light_wall
   rotate: false
-  xy: 205, 40
+  xy: 205, 33
   size: 32, 8
   orig: 32, 8
   offset: 0, 0
   index: -1
 gui/bg
   rotate: false
-  xy: 233, 123
+  xy: 205, 15
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 gui/bg_corner
   rotate: false
-  xy: 171, 76
+  xy: 67, 75
   size: 24, 24
   orig: 24, 24
   offset: 0, 0
   index: -1
 gui/closed_connection
   rotate: false
-  xy: 233, 94
+  xy: 93, 90
   size: 8, 9
   orig: 8, 9
   offset: 0, 0
   index: -1
 gui/default
   rotate: false
-  xy: 205, 22
+  xy: 223, 15
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 gui/hover_overlay
   rotate: false
-  xy: 233, 105
+  xy: 273, 77
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 gui/junction_connection
   rotate: false
-  xy: 103, 1
+  xy: 93, 79
   size: 8, 9
   orig: 8, 9
   offset: 0, 0
   index: -1
 gui/open_connection
   rotate: false
-  xy: 113, 1
+  xy: 171, 90
   size: 8, 9
   orig: 8, 9
   offset: 0, 0
   index: -1
 gui/panning
   rotate: false
-  xy: 205, 4
+  xy: 273, 59
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 gui/placing
   rotate: false
-  xy: 223, 22
+  xy: 273, 41
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 gui/selected_junction
   rotate: false
-  xy: 123, 1
+  xy: 301, 129
   size: 8, 9
   orig: 8, 9
   offset: 0, 0
   index: -1
 gui/wiring
   rotate: false
-  xy: 223, 4
+  xy: 291, 77
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: -1
 objects/battery/down
   rotate: false
-  xy: 1, 3
+  xy: 1, 2
   size: 32, 70
   orig: 32, 70
   offset: 0, 0
   index: -1
 objects/battery/left
   rotate: false
-  xy: 67, 102
+  xy: 67, 101
   size: 64, 37
   orig: 64, 37
   offset: 0, 0
   index: -1
 objects/battery/right
   rotate: false
-  xy: 133, 102
+  xy: 133, 101
   size: 64, 37
   orig: 64, 37
   offset: 0, 0
   index: -1
 objects/battery/up
   rotate: false
-  xy: 35, 3
+  xy: 35, 2
   size: 32, 70
   orig: 32, 70
   offset: 0, 0
   index: -1
 objects/bulb/bulb
   rotate: false
-  xy: 199, 89
+  xy: 199, 88
   size: 32, 50
   orig: 32, 50
   offset: 0, 0
   index: -1
 objects/bulb/glass
   rotate: false
-  xy: 69, 50
+  xy: 233, 88
   size: 32, 50
   orig: 32, 50
   offset: 0, 0
   index: -1
 objects/bulb/glow
   rotate: false
-  xy: 1, 75
+  xy: 1, 74
   size: 64, 64
   orig: 64, 64
   offset: 0, 0
   index: -1
 objects/cube
   rotate: false
-  xy: 69, 5
+  xy: 267, 95
   size: 32, 43
   orig: 32, 43
   offset: 0, 0
   index: -1
 objects/cylinder/horizontal
   rotate: false
-  xy: 103, 57
+  xy: 137, 56
   size: 32, 43
   orig: 32, 43
   offset: 0, 0
   index: -1
 objects/cylinder/vertical
   rotate: false
-  xy: 171, 31
+  xy: 239, 43
   size: 32, 43
   orig: 32, 43
   offset: 0, 0
   index: -1
 objects/switch/off
   rotate: false
-  xy: 103, 12
+  xy: 137, 11
   size: 32, 43
   orig: 32, 43
   offset: 0, 0
   index: -1
 objects/switch/on
   rotate: false
-  xy: 137, 57
+  xy: 171, 43
   size: 32, 43
   orig: 32, 43
   offset: 0, 0
   index: -1
 objects/tnt
   rotate: false
-  xy: 137, 12
+  xy: 205, 43
   size: 32, 43
   orig: 32, 43
   offset: 0, 0

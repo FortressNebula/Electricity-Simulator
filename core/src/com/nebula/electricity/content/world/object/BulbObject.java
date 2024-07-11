@@ -44,8 +44,8 @@ public class BulbObject extends SimpleObject {
         if (internalConnection.isPresent() && ELECTRICITY.CONNECTIONS.get(internalConnection.get()) != null) {
             getProperties().set("brightness", Math.abs(ELECTRICITY.CONNECTIONS.get(internalConnection.get())
                     .getCurrent()) / 5D);
-            System.out.println(Math.abs(ELECTRICITY.CONNECTIONS.get(internalConnection.get())
-                    .getCurrent()));
+            //System.out.println(Math.abs(ELECTRICITY.CONNECTIONS.get(internalConnection.get())
+            //         .getCurrent()));
         } else {
             getProperties().set("brightness", 0D);
         }

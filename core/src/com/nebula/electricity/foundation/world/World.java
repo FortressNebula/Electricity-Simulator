@@ -2,18 +2,17 @@ package com.nebula.electricity.foundation.world;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.ObjectMap;
-import com.badlogic.gdx.utils.OrderedMap;
 import com.nebula.electricity.ElectricitySimulator;
 import com.nebula.electricity.foundation.Constants;
 import com.nebula.electricity.foundation.Module;
 import com.nebula.electricity.foundation.electricity.component.Connection;
+import com.nebula.electricity.foundation.explosion.Fire;
 import com.nebula.electricity.foundation.world.object.WorldObject;
 import com.nebula.electricity.math.Vector2i;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import static com.nebula.electricity.ElectricitySimulator.ELECTRICITY;
 
@@ -25,7 +24,7 @@ public class World implements Module {
     // Associated renderer
     public WorldRenderer renderer;
     // Objects
-    private OrderedMap<UUID, WorldObject> allObjects;
+    private HashMap<UUID, WorldObject> allObjects;
     // DEBUG
     public Vector2i selectedCoord;
 
@@ -41,7 +40,7 @@ public class World implements Module {
         renderer = new WorldRenderer();
 
         // Initialise object map
-        allObjects = new OrderedMap<>();
+        allObjects = new HashMap<>();
 
         // Selected coordinate
         selectedCoord = new Vector2i(-1, -1);
@@ -55,8 +54,7 @@ public class World implements Module {
 
     @Override
     public void draw (SpriteBatch batch, ShapeRenderer shapes) {
-        Array<WorldObject> objects = allObjects.values().toArray();
-        objects.sort(Comparator.comparingInt(a -> -a.getPos().y));
+        List<WorldObject> objects = allObjects.values().stream().sorted(Comparator.comparingInt(a -> -a.getPos().y)).collect(Collectors.toList());
         renderer.draw(batch, objects);
     }
 
@@ -66,12 +64,12 @@ public class World implements Module {
     }
 
     // Object methods
-    public Array<WorldObject> getAllObjects () { return allObjects.values().toArray(); }
+    public Collection<WorldObject> getAllObjects () { return allObjects.values(); }
 
     public void forEachElectricalObject (Consumer<WorldObject> func) {
-        allObjects.forEach(entry -> {
-            if (entry.value.isElectric())
-                func.accept(entry.value);
+        allObjects.values().forEach(object -> {
+            if (object.isElectric())
+                func.accept(object);
         });
     }
 
@@ -87,6 +85,13 @@ public class World implements Module {
 
         allObjects.put(UUID.randomUUID(), object);
         return true;
+    }
+
+    public void setFireAt (Vector2i pos) {
+        if (renderer.fires.stream().noneMatch(fire -> fire.position.equals(pos)))
+            renderer.fires.add(new Fire(pos));
+
+        renderer.fires.sort(Comparator.comparingInt(a -> -a.position.y));
     }
 
     public WorldObject getObject (UUID id) {
@@ -121,8 +126,14 @@ public class World implements Module {
         if (!pos.withinBounds(Constants.LIMITS.x, Constants.LIMITS.y))
             return Optional.empty();
 
-        for (ObjectMap.Entry<UUID, WorldObject> entry : allObjects.iterator())
-            if (entry.value.occupiedAt(pos)) return Optional.of(entry.key);
+        for (Map.Entry<UUID, WorldObject> entry : allObjects.entrySet())
+            if (entry.getValue().occupiedAt(pos)) return Optional.of(entry.getKey());
+        return Optional.empty();
+    }
+
+    public Optional<UUID> idOf (WorldObject object) {
+        for (Map.Entry<UUID, WorldObject> entry : allObjects.entrySet())
+            if (entry.getValue().equals(object)) return Optional.of(entry.getKey());
         return Optional.empty();
     }
 

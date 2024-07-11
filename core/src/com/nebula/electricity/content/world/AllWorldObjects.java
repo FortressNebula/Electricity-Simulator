@@ -11,11 +11,10 @@ public class AllWorldObjects {
             .withTexture("cube")
             .oneByOne()
             .finished();
-    // TODO: add tnt
-//    public static final WorldObjectCreator<SimpleObject> TNT = WorldObjectCreator.create("tnt")
-//            .withTexture("tnt")
-//            .oneByOne()
-//            .finished();
+    public static final WorldObjectCreator<TNTObject> TNT = WorldObjectCreator.create("tnt", TNTObject::new)
+            .withTexture("tnt")
+            .oneByOne()
+            .finished();
    public static final WorldObjectCreator<AxisObject> CYLINDER = WorldObjectCreator.create("cylinder", AxisObject::new)
            .withTextures(AxisObject.textures("cylinder"))
            .oneByOne()
