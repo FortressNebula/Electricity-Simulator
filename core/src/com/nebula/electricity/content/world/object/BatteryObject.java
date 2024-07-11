@@ -7,7 +7,7 @@ public class BatteryObject extends DirectionalObject {
     @Override
     public ElectricProperties createElectricProperties () {
         return new ElectricProperties()
-                .voltage(12f)
+                .voltage(120f)
                 .addNode(0, 0, Direction.LEFT)
                 .addNode(1, 0, Direction.RIGHT)
                 .buildAt(position, getSize(), properties.getDirection());

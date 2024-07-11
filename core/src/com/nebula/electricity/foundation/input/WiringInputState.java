@@ -2,7 +2,6 @@ package com.nebula.electricity.foundation.input;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Cursor;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -152,9 +151,6 @@ public class WiringInputState extends InputState {
 
             if (debugMode == DebugMode.OFF) {
                 drawConnections(circuit.getConnections(), shapes, false);
-            } else if (debugMode == DebugMode.DIRECTIONS) {
-                shapes.setColor(Color.WHITE);
-                drawCircuitWithDirections(circuit, shapes, true);
             } else if (debugMode == DebugMode.CYCLES) {
                 if (cycleID >= circuit.getCycles().size() || cycleID < 0)
                     continue;
@@ -166,25 +162,6 @@ public class WiringInputState extends InputState {
 
         }
         shapes.setColor(1,1,1,1);
-    }
-
-    void drawCircuitWithDirections (Circuit circuit, ShapeRenderer shapes, boolean drawInternals) {
-        circuit.getConnectionMap().forEach((ref, dir) -> {
-            if (!ELECTRICITY.CONNECTIONS.get(ref).shouldDraw && !drawInternals)
-                return;
-
-            Vector2i startPos = ELECTRICITY.VERTICES.get(ref.getID1()).getRenderPosition().add(20);
-            Vector2i endPos = ELECTRICITY.VERTICES.get(ref.getID2()).getRenderPosition().add(20);
-
-            if (dir == Circuit.CircuitDirection.UNDIRECTED)
-                shapes.rectLine(startPos.x, startPos.y, endPos.x, endPos.y, 25);
-            else {
-                Color c1 = dir == Circuit.CircuitDirection.FORWARD ? Color.GREEN : Color.RED;
-                Color c2 = dir == Circuit.CircuitDirection.REVERSE ? Color.GREEN : Color.RED;
-
-                shapes.rectLine(startPos.x, startPos.y, endPos.x, endPos.y, 25, c1, c2);
-            }
-        });
     }
 
     void drawConnections (Collection<Connection> all, ShapeRenderer shapes, boolean drawInternals) {
@@ -302,7 +279,6 @@ public class WiringInputState extends InputState {
 
     enum DebugMode {
         OFF,
-        DIRECTIONS,
         CYCLES,
         SPANNING_TREE;
 

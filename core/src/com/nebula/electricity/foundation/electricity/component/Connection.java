@@ -31,6 +31,14 @@ public class Connection {
         return new Connection(i, j);
     }
 
+    public Connection undirect () {
+        return Connection.of(this);
+    }
+
+    public Connection reverse () {
+        return new Connection(id2, id1);
+    }
+
     public boolean containsVertex (int id) {
         return id1 == id || id2 == id;
     }

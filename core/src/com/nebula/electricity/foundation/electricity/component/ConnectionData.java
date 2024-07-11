@@ -34,7 +34,7 @@ public class ConnectionData {
     }
 
     public double getResistance () {
-        return resistance;
+        return Math.max(resistance, 1E-10);
     }
 
     public double getCurrent () {

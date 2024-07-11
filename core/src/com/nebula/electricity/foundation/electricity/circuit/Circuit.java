@@ -12,7 +12,7 @@ public class Circuit {
     Color debugColour;
 
     List<FundamentalCycle> fundamentalCycles;
-    HashMap<Connection, CircuitDirection> connections; // Sorted by direction
+    List<Connection> connections;
 
     private Circuit () {
         debugColour = new Color(ElectricitySimulator.RANDOM.nextFloat(),
@@ -20,7 +20,7 @@ public class Circuit {
                 ElectricitySimulator.RANDOM.nextFloat(),
                 1f);
         fundamentalCycles = new ArrayList<>();
-        connections = new HashMap<>();
+        connections = new ArrayList<>();
     }
 
     public static Circuit make () {
@@ -32,7 +32,7 @@ public class Circuit {
     }
 
     public boolean containsVertex (int id) {
-        for (Connection ref : connections.keySet())
+        for (Connection ref : connections)
             if (ref.containsVertex(id))
                 return true;
 
@@ -40,14 +40,13 @@ public class Circuit {
     }
 
     public Circuit include (Connection ref) {
-        connections.put(ref, CircuitDirection.UNDIRECTED);
+        connections.add(ref);
         update();
         return this;
     }
 
     public Circuit include (Collection<Connection> refs) {
-        for (Connection ref : refs)
-            connections.put(ref, CircuitDirection.UNDIRECTED);
+        connections.addAll(refs);
         update();
         return this;
     }
@@ -59,27 +58,23 @@ public class Circuit {
     }
 
     public boolean isEmpty () {
-        return connections.keySet().isEmpty();
+        return connections.isEmpty();
     }
 
     public void merge (Circuit other) {
-        include(other.connections.keySet());
+        include(other.connections);
     }
 
-    // Using the newly-collected array of connections, update the fundamental cycles
     public void update () {
         fundamentalCycles.clear();
-        // Make all connections undirected
-        connections.keySet().forEach(ref -> {
-            connections.put(ref, CircuitDirection.UNDIRECTED);
-            ElectricitySimulator.ELECTRICITY.CONNECTIONS.get(ref).reset();
-        });
+
+        // Reset all connections
+        connections.forEach(ref -> ElectricitySimulator.ELECTRICITY.CONNECTIONS.get(ref).reset());
 
         generateCycles();
 
-        if (fundamentalCycles.stream().noneMatch(cycle -> cycle.direction != CircuitDirection.INVALID))
+        if (fundamentalCycles.isEmpty())
             return;
-
 
         solve();
     }
@@ -95,7 +90,7 @@ public class Circuit {
 
             voltages.set(i, 0, primaryCycle.connections.stream()
                     .mapToDouble(connection -> ElectricitySimulator.ELECTRICITY.CONNECTIONS.get(connection)
-                            .getVoltage(connections.get(connection)))
+                            .getVoltage(connection.getID1() > connection.getID2() ? CircuitDirection.REVERSE : CircuitDirection.FORWARD))
                     .sum()
             );
 
@@ -103,24 +98,45 @@ public class Circuit {
             for (int j = 0; j < fundamentalCycles.size(); j++) {
                 FundamentalCycle secondaryCycle = fundamentalCycles.get(j);
 
-                if (secondaryCycle.direction == CircuitDirection.INVALID)
-                    continue;
-
                 // Sum up all the resistances of the common branches
-                double resistance = secondaryCycle.connections.stream()
-                        .filter(connection -> primaryCycle.connections.contains(connection))
-                        .mapToDouble(connection -> ElectricitySimulator.ELECTRICITY.CONNECTIONS.get(connection)
-                                .getResistance())
-                        .sum();
+//                double resistance = secondaryCycle.connections.stream()
+//                        // Look for common connections
+//                        .filter(connection -> primaryCycle.connections.contains(connection) || primaryCycle.connections.contains(connection.reverse()))
+//                        .mapToDouble(connection ->
+//                                ElectricitySimulator.ELECTRICITY.CONNECTIONS.get(connection).getResistance() *
+//                                        (primaryCycle.connections.contains(connection.reverse()) ? -1 : 1))
+//                        .sum();
 
-                resistances.set(i, j,
-                        Math.max(resistance, 0.000001) * (secondaryCycle.direction != primaryCycle.direction ? -1 :1)
-                );
+                // Non-functional approach for debugging
+                List<Connection> common = secondaryCycle.connections.stream()
+                        .filter(connection -> primaryCycle.connections.contains(connection) || primaryCycle.connections.contains(connection.reverse()))
+                        .collect(Collectors.toList());
+
+                double resistance = 0.0;
+
+                for (Connection c : common) {
+                    resistance += ElectricitySimulator.ELECTRICITY.CONNECTIONS.get(c).getResistance() *
+                                        (primaryCycle.connections.contains(c.reverse()) ? -1 : 1);
+                }
+
+                resistances.set(i, j, resistance);
             }
         }
 
         // Solve!
-        Matrix currents = resistances.solve(voltages);
+        Matrix currents = new Matrix(fundamentalCycles.size(), 1);
+
+        System.out.println("RESISTANCES");
+        resistances.print(3, 3);
+
+        try {
+            currents = resistances.solve(voltages);
+            System.out.println("CURRENTS");
+            currents.print(3, 3);
+        } catch (RuntimeException e) {
+            System.out.println("FAILED!!");
+            e.printStackTrace();
+        }
 
         for (int i = 0; i < fundamentalCycles.size(); i++) {
             fundamentalCycles.get(i).setCurrent(currents.get(i, 0));
@@ -133,7 +149,7 @@ public class Circuit {
         if (spanningTree.isEmpty())
             return;
 
-        List<Connection> removedConnections = connections.keySet().stream()
+        List<Connection> removedConnections = connections.stream()
                 .filter(ref -> !spanningTree.contains(ref))
                 .collect(Collectors.toList());
 
@@ -150,52 +166,22 @@ public class Circuit {
         List<Connection> cycleConnections = new ArrayList<>();
 
         if (nodes.size() == 0)
-            return new FundamentalCycle(List.of(), CircuitDirection.INVALID);
+            return new FundamentalCycle(List.of());
 
         nodes.add(nodes.get(0)); // Just to make it easier to loop around
 
-        CircuitDirection direction = CircuitDirection.UNDIRECTED;
-
-        // Iterate over every connection
-        for (int i = 0; i < nodes.size() - 1; i++) {
-            // Check its direction
-            int from = nodes.get(i);
-            int to = nodes.get(i + 1);
-
-            CircuitDirection connectionDirection =
-                    connections.get(Connection.of(from, to)).relativeTo(from, to);
-
-            if (connectionDirection == CircuitDirection.UNDIRECTED) // Doesn't really matter if it just justifies what we've already seen
-                continue;
-            // We found an oriented connection that's different!!
-
-            if (direction == CircuitDirection.UNDIRECTED) // Set the cycle direction
-                direction = connectionDirection;
-            else if (connectionDirection != direction) {
-                // wuh oh, that's a conflicting loop
-                direction = CircuitDirection.INVALID;
-                break;
-            }
-        }
-
-        if (direction == CircuitDirection.UNDIRECTED)
-            direction = CircuitDirection.FORWARD;
-
         for (int i = 0; i < nodes.size() - 1; i++) {
             int from = nodes.get(i);
             int to = nodes.get(i + 1);
 
-            if (direction != CircuitDirection.INVALID)
-                connections.put(Connection.of(from, to), direction.relativeTo(from, to));
-            cycleConnections.add(Connection.of(from, to));
+            cycleConnections.add(Connection.directed(from, to));
         }
 
-        return new FundamentalCycle(cycleConnections, direction);
+        return new FundamentalCycle(cycleConnections);
     }
 
     public List<FundamentalCycle> getCycles () { return fundamentalCycles; }
-    public Set<Connection> getConnections () { return connections.keySet(); }
-    public HashMap<Connection, CircuitDirection> getConnectionMap () { return connections; }
+    public List<Connection> getConnections () { return connections; }
 
     public Color getDebugColour () { return debugColour; }
     public void setDebugColour (Color colour) { debugColour = colour; }
@@ -203,7 +189,7 @@ public class Circuit {
     // Solving mechanics
 
     public List<Connection> getSpanningTree () {
-        if (connections.keySet().isEmpty())
+        if (connections.isEmpty())
             return List.of();
 
         List<Integer> visited = new ArrayList<>();
@@ -211,14 +197,14 @@ public class Circuit {
 
         ArrayDeque<Integer> stack = new ArrayDeque<>();
         // It shouldn't be this hard to just get one item out of a set jesus christ
-        stack.add(new ArrayList<>(connections.keySet()).get(0).getID1());
+        stack.add(connections.get(0).getID1());
 
         // DFS woohoo
         while (!stack.isEmpty()) {
             int i = stack.pop();
 
             // Check all connections that feature this vertex and have NOT been visited
-            List<Connection> adjacent = connections.keySet().stream()
+            List<Connection> adjacent = connections.stream()
                     .filter(ref -> ref.containsVertex(i))
                     .filter(ref -> !visited.contains(ref.getOther(i)))
                     .filter(ref -> !spanningTree.contains(ref))
@@ -236,17 +222,7 @@ public class Circuit {
     }
 
     public enum CircuitDirection {
-        INVALID,
-        UNDIRECTED,
         FORWARD, // ID1 TO ID2
-        REVERSE; // ID2 TO ID1
-
-        CircuitDirection relativeTo (int from, int to) {
-            switch (this) {
-                case FORWARD: return from > to ? CircuitDirection.REVERSE : CircuitDirection.FORWARD;
-                case REVERSE: return from > to ? CircuitDirection.FORWARD : CircuitDirection.REVERSE;
-                default: return CircuitDirection.UNDIRECTED;
-            }
-        }
+        REVERSE  // ID2 TO ID1
     }
 }

@@ -35,6 +35,12 @@ public class Electricity implements Module {
         };
 
         CONNECTIONS = new Registry<>() {
+
+            @Override
+            public ConnectionData get (Connection id) {
+                return super.get(id.undirect());
+            }
+
             @Override
             Connection makeID (ConnectionData component) {
                 throw new IllegalStateException("what on earth are you doing");

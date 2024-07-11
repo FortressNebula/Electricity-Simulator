@@ -8,12 +8,10 @@ import java.util.stream.Collectors;
 
 public class FundamentalCycle {
     List<Connection> connections;
-    Circuit.CircuitDirection direction;
     double current;
 
-    FundamentalCycle (List<Connection> connections, Circuit.CircuitDirection direction) {
+    FundamentalCycle (List<Connection> connections) {
         this.connections = connections;
-        this.direction = direction;
         this.current = 0;
     }
 
@@ -23,7 +21,9 @@ public class FundamentalCycle {
 
     void addCurrentToConnections () {
         for (Connection connection : connections) {
-            ElectricitySimulator.ELECTRICITY.CONNECTIONS.get(connection).addCurrent(current);
+            double localCurrent = current * (connection.getID1() > connection.getID2() ? -1D : 1D);
+            ElectricitySimulator.ELECTRICITY.CONNECTIONS.get(connection)
+                    .addCurrent(localCurrent);
         }
     }
 
