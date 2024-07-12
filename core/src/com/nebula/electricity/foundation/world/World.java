@@ -88,9 +88,13 @@ public class World implements Module {
     }
 
     public void setFireAt (Vector2i pos) {
-        if (renderer.fires.stream().noneMatch(fire -> fire.position.equals(pos)))
-            renderer.fires.add(new Fire(pos));
+        if (!pos.withinBounds(Constants.LIMITS.x, Constants.LIMITS.y))
+            return;
 
+        if (renderer.fires.stream().anyMatch(fire -> fire.position.equals(pos)))
+            return;
+
+        renderer.fires.add(new Fire(pos));
         renderer.fires.sort(Comparator.comparingInt(a -> -a.position.y));
     }
 
@@ -117,9 +121,12 @@ public class World implements Module {
         return allObjects.remove(id) != null;
     }
 
-    public void clearObjects () {
+    public void reset () {
         allObjects.clear();
         ELECTRICITY.CONNECTIONS.clear();
+        ELECTRICITY.VERTICES.clear();
+        ELECTRICITY.CIRCUITS.clear();
+        renderer.fires.clear();
     }
 
     public Optional<UUID> objectAt (Vector2i pos) {

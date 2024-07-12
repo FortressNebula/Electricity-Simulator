@@ -22,6 +22,8 @@ public class PlacingInputState extends InputState {
     float alpha;
     int frameCounter;
 
+    boolean canPlaceYet;
+
     public PlacingInputState (Vector2i screenPos) {
         currentIndex = 0;
 
@@ -30,6 +32,8 @@ public class PlacingInputState extends InputState {
         Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Hand);
 
         alpha = 0f;
+
+        canPlaceYet = false;
     }
 
     @Override
@@ -69,14 +73,23 @@ public class PlacingInputState extends InputState {
         }
 
         if (code == Input.Keys.R) {
-            ElectricitySimulator.WORLD.clearObjects();
+            ElectricitySimulator.WORLD.reset();
         }
 
         return false;
     }
 
     @Override
+    boolean touchUp (Vector2i screenPos, int pointer, int button) {
+        canPlaceYet = true;
+        return false;
+    }
+
+    @Override
     public boolean touchDown (Vector2i screenPos, int pointer, int button) {
+        if (!canPlaceYet)
+            return false;
+
         if (button == Input.Buttons.LEFT && isValid)
             return add(currentObject.getPos());
 
