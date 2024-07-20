@@ -9,6 +9,7 @@ import com.nebula.electricity.foundation.Module;
 import com.nebula.electricity.foundation.electricity.circuit.Circuit;
 import com.nebula.electricity.foundation.electricity.component.*;
 import com.nebula.electricity.foundation.events.Events;
+import com.nebula.electricity.foundation.input.WiringInputState;
 import com.nebula.electricity.math.Direction;
 import com.nebula.electricity.math.Vector2i;
 
@@ -32,6 +33,35 @@ public class Electricity implements Module {
         VERTICES = new Registry<>() {
             @Override
             Integer makeID (CircuitVertex component) { return component.getID(); }
+
+            @Override
+            void onAdded (Integer id) {
+                // make any automatic additions
+                getSubset(Node.class).forEach(Node::unlock);
+
+                for (int i = 0; i < all.size(); i++) {
+                    CircuitVertex vertexA = all.get(i);
+                    if (!(vertexA instanceof Node))
+                        continue;
+                    Node a = (Node) vertexA;
+
+                    for (int j = i + 1; j < all.size(); j++) {
+                        CircuitVertex vertexB = all.get(j);
+                        if (!(vertexB instanceof Node))
+                            continue;
+                        Node b = (Node) vertexB;
+
+                        if (!a.getPosition().add(Vector2i.fromDirection(a.getDirection())).equals(b.getPosition()))
+                            continue;
+                        if (!b.getPosition().add(Vector2i.fromDirection(b.getDirection())).equals(a.getPosition()))
+                            continue;
+
+                        WiringInputState.connectNodes(a, b);
+                        a.lock();
+                        b.lock();
+                    }
+                }
+            }
         };
 
         CONNECTIONS = new Registry<>() {
@@ -206,6 +236,8 @@ public class Electricity implements Module {
             if (!node.getConnected())
                 continue;
             if (node.getDirection() == Direction.UP)
+                continue;
+            if (node.isLocked())
                 continue;
 
             Vector2i drawPos = node.getCombinedPosition();

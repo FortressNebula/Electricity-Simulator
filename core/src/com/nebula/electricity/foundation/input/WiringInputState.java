@@ -204,7 +204,7 @@ public class WiringInputState extends InputState {
         return connectNodeToNode((Node) vertex, (Node) ELECTRICITY.VERTICES.get(connectingID));
     }
 
-    boolean connectNodeToNode (Node a, Node b) {
+    public static boolean connectNodes (Node a, Node b) {
         if (!a.canConnect() || !b.canConnect())
             return false;
 
@@ -235,7 +235,12 @@ public class WiringInputState extends InputState {
             props.update();
         }
 
-        connectingID = -1;
+        return true;
+    }
+
+    boolean connectNodeToNode (Node a, Node b) {
+        if (connectNodes(a, b))
+            connectingID = -1;
         return true;
     }
 
@@ -261,6 +266,12 @@ public class WiringInputState extends InputState {
     //endregion
 
     boolean disconnect (CircuitVertex vertex, boolean shouldDelete) {
+        if (vertex instanceof Node) {
+            Node n = (Node) vertex;
+            if (n.isLocked())
+                return false;
+        }
+
         vertex.setConnected(false);
 
         if (shouldDelete)

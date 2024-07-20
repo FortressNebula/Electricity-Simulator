@@ -78,12 +78,13 @@ public class World implements Module {
         if (!object.withinWorldBounds()) return false;
         if (canPlace(object)) return false;
 
+        allObjects.put(UUID.randomUUID(), object);
+
         // Electrical
         object.initElectricProperties();
         if (object.isElectric())
             ELECTRICITY.VERTICES.add(object.getElectricProperties().getNodes());
 
-        allObjects.put(UUID.randomUUID(), object);
         return true;
     }
 

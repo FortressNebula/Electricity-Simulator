@@ -11,6 +11,7 @@ public class Node implements CircuitVertex {
     Vector2i renderPosition;
     Vector2i directionOffset;
 
+    boolean isEditable;
     boolean isConnected;
     boolean isEnabled;
     boolean isTransformDirty;
@@ -26,6 +27,7 @@ public class Node implements CircuitVertex {
         this.direction = direction;
         renderPosition = Vector2i.INVALID;
         directionOffset = Vector2i.INVALID;
+        isEditable = true;
         isConnected = false;
         isEnabled = true;
         isTransformDirty = true;
@@ -75,7 +77,7 @@ public class Node implements CircuitVertex {
 
     @Override
     public boolean canConnect () {
-        return isEnabled && !isConnected;
+        return isEnabled && !isConnected && isEditable;
     }
 
     private Vector2i getTileAlignmentOffset () {
@@ -89,11 +91,22 @@ public class Node implements CircuitVertex {
     }
 
     public Direction getDirection () { return direction; }
+    public Vector2i getPosition () { return position; }
 
     public boolean getEnabled () { return isEnabled; }
     public boolean getConnected () { return isConnected; }
     public void setEnabled(boolean value) { isEnabled = value; }
     public void setConnected(boolean value) { isConnected = value; }
+
+    public void lock () {
+        isEditable = false;
+    }
+    public void unlock () {
+        isEditable = true;
+    }
+    public boolean isLocked () {
+        return !isEditable;
+    }
 
     @Override
     public int getID () { return id; }
