@@ -120,7 +120,7 @@ public class WiringInputState extends InputState {
         for (Node node : ELECTRICITY.VERTICES.getSubset(Node.class)) {
             Vector2i drawPos = node.getRenderPosition();
 
-            batch.setColor(1, 1, 1, node.getEnabled() ? 1 : 0.5f);
+            batch.setColor(1, 1, 1, node.getEnabled() && !node.isLocked() ? 1 : 0.5f);
             batch.draw(node.getID() == connectingID || node.getConnected() ? closedConnection : openConnection,
                     drawPos.x, drawPos.y, Constants.SCALE * 8, Constants.SCALE * 9);
         }

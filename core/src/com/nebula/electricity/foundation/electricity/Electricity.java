@@ -36,17 +36,30 @@ public class Electricity implements Module {
 
             @Override
             void onAdded (Integer id) {
-                // make any automatic additions
+                update();
+            }
+
+            @Override
+            void onDeleted (Integer id) {
+                update();
+            }
+
+            @Override
+            void onClear () {
+                update();
+            }
+
+            private void update () {
                 getSubset(Node.class).forEach(Node::unlock);
 
-                for (int i = 0; i < all.size(); i++) {
-                    CircuitVertex vertexA = all.get(i);
+                for (CircuitVertex vertexA : all.values()) {
                     if (!(vertexA instanceof Node))
                         continue;
                     Node a = (Node) vertexA;
+                    if (a.isLocked())
+                        continue;
 
-                    for (int j = i + 1; j < all.size(); j++) {
-                        CircuitVertex vertexB = all.get(j);
+                    for (CircuitVertex vertexB : all.values()) {
                         if (!(vertexB instanceof Node))
                             continue;
                         Node b = (Node) vertexB;
@@ -59,6 +72,8 @@ public class Electricity implements Module {
                         WiringInputState.connectNodes(a, b);
                         a.lock();
                         b.lock();
+                        // After finding one match, there can't be any other. So break from the loop
+                        break;
                     }
                 }
             }

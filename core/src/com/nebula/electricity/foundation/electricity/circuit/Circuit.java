@@ -137,8 +137,8 @@ public class Circuit {
             //System.out.println("CURRENTS");
             //currents.print(3, 3);
         } catch (RuntimeException e) {
-            System.out.println("FAILED!!");
-            e.printStackTrace();
+            //System.out.println("FAILED!!");
+            //e.printStackTrace();
         }
 
         for (int i = 0; i < fundamentalCycles.size(); i++) {
